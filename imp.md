@@ -42,9 +42,9 @@ IMP is a simple imperative language which supports:
 -   and Looping:
 
     ```imp
-    while (x > 3) {
+    while (x < 30) {
         y = y * x;
-        x = x - 1;
+        x = x + 1;
     }
     ```
 
@@ -57,7 +57,7 @@ Examples
 int n, s;
 n = 10;
 s = 0;
-while (n > 0) {
+while (0 < n) {
     s = s + n;
     n = n - 1;
 }
