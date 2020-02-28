@@ -141,5 +141,8 @@ IMP has `if(_)_else_` for choice, `while(_)_` for looping, and `__` for sequenci
 
 ```k
     syntax priority int_;_IMP _=_;_IMP if(_)_else__IMP while(_)__IMP > ___IMP
+```
+
+```k
 endmodule
 ```
