@@ -105,8 +105,9 @@ test_imp_files := $(wildcard tests/*.imp)
 
 test-imp-k: $(test_imp_files:=.run-k)
 
-tests/%.imp.run-k: tests/%.imp.out
-	$(CHECK) tests/$*.imp.out tests/$*.imp.expected
+tests/%.imp.run-k: tests/%.imp.k-out
+	$(CHECK) $< tests/$*.imp.k-expected
 
-tests/%.imp.out: tests/%.imp $(imp_k_kompiled) 
+.SECONDARY: $(test_imp_files:=.k-out)
+tests/%.imp.k-out: tests/%.imp $(imp_k_kompiled) 
 	krun --directory $(imp_k_dir) $< > $@
