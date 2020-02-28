@@ -110,5 +110,5 @@ tests/%.imp.run-k: tests/%.imp.k-out
 	$(CHECK) $< tests/$*.imp.k-expected
 
 .SECONDARY: $(test_imp_files:=.k-out)
-tests/%.imp.k-out: tests/%.imp $(imp_k_kompiled) 
+tests/%.imp.k-out: tests/%.imp $(imp_k_kompiled)
 	krun --directory $(imp_k_dir) $< > $@
