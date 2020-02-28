@@ -16,9 +16,5 @@ Currently, the semantic frameworks we support are:
 
 The languages we have examples for are:
 
--   IMP: A simple imperative language with assignment, lookup, arithmetic/boolean expressions, conditionals, and loops.
--   FUN: A functional language with algebraic data-types, pattern-matching, let-bindings, recursion, and lambda functions.
-
-See the following files:
-
--   <imp-k.md>: Implementation of IMP in K.
+-   [IMP](imp.md): A simple imperative language with assignment, lookup, arithmetic/boolean expressions, conditionals, and loops.
+-   [FUN](fun.md): A functional language with algebraic data-types, pattern-matching, let-bindings, recursion, and lambda functions.
