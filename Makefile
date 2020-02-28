@@ -63,10 +63,10 @@ $(TANGLER):
 # --------
 
 imp_k_module := IMP
-imp_k_dir    := $(DEFN_DIR)/k/imp
+imp_k_dir    := $(DEFN_DIR)/k/imp-k
 imp_k_files  := $(imp_k_dir)/imp-k.k
 
-imp_k_kompiled := $(imp_k_dir)/imp-kompiled/interpreter
+imp_k_kompiled := $(imp_k_dir)/imp-k-kompiled/interpreter
 
 # Tangle definition from *.md files
 
@@ -93,3 +93,20 @@ $(imp_k_kompiled): $(imp_k_files)
 	                 --syntax-module $(imp_k_module) $(imp_k_dir)/imp-k.k     \
 	                 --directory $(imp_k_dir) -I $(imp_k_dir) -I $(imp_k_dir) \
 	                 $(KOMPILE_OPTS)
+
+# Test
+# ----
+
+CHECK := git --no-pager diff --no-index --ignore-all-space -R
+
+test: test-imp-k
+
+test_imp_files := $(wildcard tests/*.imp)
+
+test-imp-k: $(test_imp_files:=.run-k)
+
+tests/%.imp.run-k: tests/%.imp.out
+	$(CHECK) tests/$*.imp.out tests/$*.imp.expected
+
+tests/%.imp.out: tests/%.imp $(imp_k_kompiled) 
+	krun --directory $(imp_k_dir) $< > $@

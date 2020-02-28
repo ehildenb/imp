@@ -1,0 +1,16 @@
+int n, nprimes, curprime, tester;
+n        = 1033;
+nprimes  = 1;
+curprime = 2;
+tester   = 1;
+
+while (nprimes < n) {
+    curprime = curprime + 1;
+    tester = 2;
+    while (tester < curprime && ! ((curprime / tester) * tester == curprime) {
+        tester = tester + 1;
+    }
+    if (tester == curprime) {
+        nprimes = nprimes + 1;
+    }
+}
