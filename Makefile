@@ -30,14 +30,15 @@ export LUA_PATH
         deps deps-k deps-tangle \
         defn defn-imp-k         \
         build build-imp-k       \
-        test
+        test test-imp-k
 
 all: build split-tests
 
 clean:
 	rm -rf $(DEFN_BASE_DIR)
+	git clean -dffx -- tests/
 
-distclean:
+distclean: clean
 	rm -rf $(BUILD_DIR)
 
 # Dependencies
