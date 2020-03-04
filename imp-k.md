@@ -1,6 +1,14 @@
 IMP Language
 ============
 
+```k
+module IMP
+    imports BOOL
+    imports INT
+    imports MAP
+    imports LIST
+```
+
 Configuration
 -------------
 
@@ -8,9 +16,6 @@ The IMP language has a `<k>` cell for execution and a `<mem>` cell for storage.
 The `<k>` cell will store the remainder of the current program (the continuation), and the `<mem>` cell stores bindings to from variable names to values.
 
 ```k
-module IMP
-    imports DOMAINS
-
     configuration
       <imp>
         <k>   $PGM:Stmt </k>
@@ -39,8 +44,8 @@ There is one special result `div-zero-error`, which division by zero leads to.
 This error halts execution immediately (has no semantic rules).
 
 ```k
-    syntax KItem ::= "div-zero-error"
- // ---------------------------------
+    syntax Pgm ::= "div-zero-error"
+ // -------------------------------
 
     syntax AExp ::= Int | Id
                   | AExp "/" AExp [left, seqstrict]
