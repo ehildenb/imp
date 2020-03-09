@@ -41,21 +41,16 @@ data BExp = BBool Bool
 
 evalAExp :: AExp -> Memory -> AExp
 evalAExp ae@(AId aid)      m = maybe ae AInt $ HM.lookup aid m
-evalAExp ae@(ADiv   a1 a2) m = maybe ae id   $ evalBinAExp a1 a2 m (div)
-evalAExp ae@(AMul   a1 a2) m = maybe ae id   $ evalBinAExp a1 a2 m (*)
-evalAExp ae@(AMinus a1 a2) m = maybe ae id   $ evalBinAExp a1 a2 m (-)
-evalAExp ae@(APlus  a1 a2) m = maybe ae id   $ evalBinAExp a1 a2 m (+)
+evalAExp ae@(ADiv   a1 a2) m = maybe ae id   $ evalBinOp a1 a2 m (div) AInt
+evalAExp ae@(AMul   a1 a2) m = maybe ae id   $ evalBinOp a1 a2 m (*)   AInt
+evalAExp ae@(AMinus a1 a2) m = maybe ae id   $ evalBinOp a1 a2 m (-)   AInt
+evalAExp ae@(APlus  a1 a2) m = maybe ae id   $ evalBinOp a1 a2 m (+)   AInt
 evalAExp i _ = i
 
-evalBinAExp :: AExp -> AExp -> Memory -> (Int -> Int -> Int) -> Maybe AExp
-evalBinAExp a1 a2 m f = case (evalAExp a1 m, evalAExp a2 m) of
-                            (AInt i1, AInt i2) -> Just $ AInt (f i1 i2)
-                            _                  -> Nothing
-
 evalBExp :: BExp -> Memory -> BExp
-evalBExp be@(BLE a1 a2) m = maybe be id $ (evalCompBExp a1 a2 m) (<=)
-evalBExp be@(BLT a1 a2) m = maybe be id $ (evalCompBExp a1 a2 m) (<)
-evalBExp be@(BEQ a1 a2) m = maybe be id $ (evalCompBExp a1 a2 m) (==)
+evalBExp be@(BLE a1 a2) m = maybe be id $ (evalBinOp a1 a2 m) (<=) BBool
+evalBExp be@(BLT a1 a2) m = maybe be id $ (evalBinOp a1 a2 m) (<)  BBool
+evalBExp be@(BEQ a1 a2) m = maybe be id $ (evalBinOp a1 a2 m) (==) BBool
 evalBExp be@(BAnd be1 be2) m = case (evalBExp be1 m, evalBExp be2 m) of
                                 (BBool b1, BBool b2) -> BBool (b1 && b2)
                                 _                    -> be
@@ -64,9 +59,9 @@ evalBExp (BNot be) m = case evalBExp be m of
                         _       -> BNot be
 evalBExp b _ = b
 
-evalCompBExp :: AExp -> AExp -> Memory -> (Int -> Int -> Bool) -> Maybe BExp
-evalCompBExp ae1 ae2 m f = case (evalAExp ae1 m, evalAExp ae2 m) of
-                            (AInt a1, AInt a2) -> Just $ BBool (f a1 a2)
+evalBinOp :: AExp -> AExp -> Memory -> (Int -> Int -> a) -> (a -> b) -> Maybe b
+evalBinOp a1 a2 m f w = case (evalAExp a1 m, evalAExp a2 m) of
+                            (AInt i1, AInt i2) -> Just $ w (f i1 i2)
                             _                  -> Nothing
 
 main :: IO ()
