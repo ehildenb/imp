@@ -1,3 +1,6 @@
 /.build
 /deps/k
+/imp-hs/imp-hs.cabal
+/imp-hs/.stack-work
+/imp-hs/stack.yaml.lock
 /tests/*.k-out
