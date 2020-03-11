@@ -1,43 +1,27 @@
 module Main where
 
-import Data.Attoparsec.ByteString
+import Text.ParserCombinators.Parsec
 import Control.Monad
 import Data.List
 import Data.HashMap.Strict
 import qualified Data.HashMap.Strict as HM ( lookup , insert , empty , toList )
 
+-- Data
+-- ================================================================================
+
 type Memory = HashMap Id Int
 
-data Configuration = Imp { k   :: Pgm
-                         , mem :: Memory
-                         }
+type Id = String
 
-instance Show Configuration where
-    show Imp { k = k , mem = m } = "<k> " ++ show k ++ " </k>\n<mem> " ++ fancyShow m ++ " </mem>"
+data Configuration = Imp { k :: Pgm , mem :: Memory }
+                   | Error PgmError Configuration
 
-fancyShow :: Memory -> String
-fancyShow m = intercalate " " $ fmap fancyShow' (HM.toList m)
-    where fancyShow' (k, v) = k ++ " |-> " ++ show v
-
-data Pgm = Error PgmError Configuration
-         | Pgm Stmt
+data Pgm = Pgm Stmt
          | Termin
-
-instance Show Pgm where
-    show (Error e c) = "Error " ++ show e ++ "    continuation: " ++ show c
-    show (Pgm s)     = show s
-    show Termin      = ""
 
 data PgmError = EvalBExpError BExp
               | EvalAExpError AExp
               | ExecError Stmt
-
-instance Show PgmError where
-    show (EvalBExpError be) = "evaluating BExp: " ++ show be
-    show (EvalAExpError ae) = "evaluating AExp: " ++ show ae
-    show (ExecError s)      = "executing: " ++ show s
-
-type Id = String
 
 data Stmt = Skip
           | Block Stmt
@@ -46,7 +30,6 @@ data Stmt = Skip
           | Conditional BExp Stmt Stmt
           | Loop BExp Stmt
           | Seq Stmt Stmt
-    deriving Show
 
 data AExp = AInt Int
           | AId  Id
@@ -54,7 +37,6 @@ data AExp = AInt Int
           | AMul   AExp AExp
           | AMinus AExp AExp
           | APlus  AExp AExp
-    deriving Show
 
 data BExp = BBool Bool
           | BLE AExp AExp
@@ -62,7 +44,64 @@ data BExp = BBool Bool
           | BEQ AExp AExp
           | BNot BExp
           | BAnd BExp BExp
-    deriving Show
+
+-- Prnting
+-- ================================================================================
+
+instance Show Configuration where
+    show (Error e c) = "== Error " ++ show e ++ "\n    continuation:\n" ++ show c
+    show Imp { k = k , mem = m } = "<k> " ++ show k ++ " </k>\n<mem> " ++ showMem m ++ " </mem>"
+        where showMem m = intercalate " " $ fmap showMem' (HM.toList m)
+              showMem' (k, v) = k ++ " |-> " ++ show v
+
+instance Show Pgm where
+    show (Pgm s) = show s
+    show Termin  = ""
+
+instance Show PgmError where
+    show (EvalBExpError be) = "evaluating BExp: " ++ show be
+    show (EvalAExpError ae) = "evaluating AExp: " ++ show ae
+    show (ExecError s)      = "executing: " ++ show s
+
+instance Show Stmt where
+    show (Skip                ) = ""
+    show (Block s             ) = "{ " ++ show s ++ " }"
+    show (VarDecls ids        ) = "int " ++ (intercalate ", " ids) ++ ";"
+    show (Assign x ae         ) = x ++ " = " ++ show ae ++ ";"
+    show (Conditional be s1 s2) = "if (" ++ show be ++ ") { " ++ show s1 ++ " } else { " ++ show s2 ++ " }"
+    show (Loop be s           ) = "while (" ++ show be ++ ") { " ++ show s ++ " }"
+    show (Seq s1 s2           ) = show s1 ++ " " ++ show s2
+
+instance Show AExp where
+    show (AInt i      ) = show i
+    show (AId x       ) = x
+    show (ADiv   a1 a2) = show a1 ++ " / " ++ show a2
+    show (AMul   a1 a2) = show a1 ++ " * " ++ show a2
+    show (AMinus a1 a2) = show a1 ++ " - " ++ show a2
+    show (APlus  a1 a2) = show a1 ++ " + " ++ show a2
+
+instance Show BExp where
+    show (BBool b  )  = show b
+    show (BLE a1 a2)  = show a1 ++ " <= " ++ show a2
+    show (BLT a1 a2)  = show a1 ++ " < "  ++ show a2
+    show (BEQ a1 a2)  = show a1 ++ " == " ++ show a2
+    show (BNot b)     = "! " ++ show b
+    show (BAnd b1 b2) = show b1 ++ " && " ++ show b2
+
+-- Parsing
+-- ================================================================================
+
+parseStmt :: Parser Stmt
+parseStmt = error "parseStmt"
+
+parseAExp :: Parser AExp
+parseAExp = error "parseAExp"
+
+parseBExp :: Parser BExp
+parseBExp = error "parseBExp"
+
+-- Expression Evaluation
+-- ================================================================================
 
 evalAExp :: AExp -> Memory -> AExp
 evalAExp ae@(AId aid)      m = maybe ae AInt $ HM.lookup aid m
@@ -89,6 +128,9 @@ evalBinOp a1 a2 m f w = case (evalAExp a1 m, evalAExp a2 m) of
                             (AInt i1, AInt i2) -> Just $ w (f i1 i2)
                             _                  -> Nothing
 
+-- Program Execution
+-- ================================================================================
+
 initVars :: [ Id ] -> Memory -> Memory
 initVars []       m = m
 initVars (v : vs) m = initVars vs $ HM.insert v 0 m
@@ -97,32 +139,36 @@ exec :: Configuration -> Configuration
 exec Imp { k = Pgm (Skip)        , mem = m } = Imp { k = Termin , mem = m             }
 exec Imp { k = Pgm (VarDecls vs) , mem = m } = Imp { k = Termin , mem = initVars vs m }
 
-exec Imp { k = Pgm (Block s)     , mem = m } = Imp { k = Pgm s  , mem = m }
+exec Imp { k = Pgm (Block s) , mem = m } = Imp { k = Pgm s  , mem = m }
 
 exec Imp { k = Pgm (Loop be s) , mem = m }
     = Imp { k = Pgm (Conditional be (Seq s (Loop be s)) Skip) , mem = m }
 
 exec c@(Imp { k = Pgm (Conditional be s1 s2) , mem = m })
     = case evalBExp be m of
-        BBool True  -> Imp { k = Pgm s1                      , mem = m }
-        BBool False -> Imp { k = Pgm s2                      , mem = m }
-        be'         -> Imp { k = Error (EvalBExpError be') c , mem = m }
+        BBool True  -> Imp { k = Pgm s1 , mem = m }
+        BBool False -> Imp { k = Pgm s2 , mem = m }
+        be'         -> Error (EvalBExpError be') c
 
 exec c@(Imp { k = Pgm s@(Seq s1 s2), mem = m })
     = case exec Imp { k = Pgm s1 , mem = m } of
-        Imp { k = Termin    , mem = m' } -> exec Imp { k = Pgm s2 , mem = m' }
-        Imp { k = Error e _ , mem = m' } -> Imp { k = Error e c , mem = m' }
-        Imp { k = Pgm s'    , mem = m' } -> Imp { k = Error (ExecError s') c , mem = m' }
+        Error e c'                    -> Error e c
+        Imp { k = Termin , mem = m' } -> exec Imp { k = Pgm s2 , mem = m' }
+        Imp { k = Pgm s' , mem = m' } -> Error (ExecError s') c
 
 exec c@(Imp { k = Pgm s@(Assign x ae) , mem = m })
     = case evalAExp ae m of
-        AInt i -> Imp { k = Termin                      , mem = HM.insert x i m }
-        ae'    -> Imp { k = Error (EvalAExpError ae') c , mem = m               }
+        AInt i -> Imp { k = Termin , mem = HM.insert x i m }
+        ae'    -> Error (EvalAExpError ae') c
+
+-- Main Control Loop
+-- ================================================================================
 
 inputPrograms :: [ Stmt ]
 inputPrograms = [ VarDecls ["x" , "y"]
                 , Seq (VarDecls ["x", "y"]) (Assign "x" (AInt 3))
                 , Seq (Seq (VarDecls ["x", "y"]) (Assign "x" (AInt 3))) (Assign "y" (AMul (AInt 4) (AId "x")))
+                , Seq (Seq (VarDecls ["x", "y"]) (Assign "x" (AInt 3))) (Assign "y" (AMul (AInt 4) (AId "z")))
                 ]
 
 emptyConfig :: Stmt -> Configuration
