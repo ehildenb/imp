@@ -1,0 +1,14 @@
+<imp>
+  <k>
+    .
+  </k>
+  <mem>
+    finalSum |-> 55
+  </mem>
+  <procs>
+    sum |-> def sum ( n , .Ids ) { int s , .Ids ; s = 0 ; while ( 0 <= n ) { s = s + n ; n = n - 1 ; } return s ; }
+  </procs>
+  <callStack>
+    .List
+  </callStack>
+</imp>
