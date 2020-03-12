@@ -139,10 +139,10 @@ exec :: Configuration -> Configuration
 exec Imp { k = Pgm (Skip)        , mem = m } = Imp { k = Termin , mem = m             }
 exec Imp { k = Pgm (VarDecls vs) , mem = m } = Imp { k = Termin , mem = initVars vs m }
 
-exec Imp { k = Pgm (Block s) , mem = m } = Imp { k = Pgm s  , mem = m }
+exec Imp { k = Pgm (Block s) , mem = m } = exec Imp { k = Pgm s  , mem = m }
 
 exec Imp { k = Pgm (Loop be s) , mem = m }
-    = Imp { k = Pgm (Conditional be (Seq s (Loop be s)) Skip) , mem = m }
+    = exec Imp { k = Pgm (Conditional be (Seq s (Loop be s)) Skip) , mem = m }
 
 exec c@(Imp { k = Pgm (Conditional be s1 s2) , mem = m })
     = case evalBExp be m of
@@ -153,8 +153,8 @@ exec c@(Imp { k = Pgm (Conditional be s1 s2) , mem = m })
 exec c@(Imp { k = Pgm s@(Seq s1 s2), mem = m })
     = case exec Imp { k = Pgm s1 , mem = m } of
         Error e c'                    -> Error e c
-        Imp { k = Termin , mem = m' } -> exec Imp { k = Pgm s2 , mem = m' }
-        Imp { k = Pgm s' , mem = m' } -> Error (ExecError s') c
+        Imp { k = Termin , mem = m' } -> exec Imp { k = Pgm s2          , mem = m' }
+        Imp { k = Pgm s' , mem = m' } -> exec Imp { k = Pgm (Seq s' s2) , mem = m' }
 
 exec c@(Imp { k = Pgm s@(Assign x ae) , mem = m })
     = case evalAExp ae m of
@@ -164,11 +164,28 @@ exec c@(Imp { k = Pgm s@(Assign x ae) , mem = m })
 -- Main Control Loop
 -- ================================================================================
 
+seqs :: [ Stmt ] -> Stmt
+seqs []       = Skip
+seqs (s : ss) = Seq s (seqs ss)
+
+ints :: [ Id ] -> Stmt
+ints is = VarDecls is
+
 inputPrograms :: [ Stmt ]
 inputPrograms = [ VarDecls ["x" , "y"]
-                , Seq (VarDecls ["x", "y"]) (Assign "x" (AInt 3))
-                , Seq (Seq (VarDecls ["x", "y"]) (Assign "x" (AInt 3))) (Assign "y" (AMul (AInt 4) (AId "x")))
-                , Seq (Seq (VarDecls ["x", "y"]) (Assign "x" (AInt 3))) (Assign "y" (AMul (AInt 4) (AId "z")))
+                , seqs [ ints ["x", "y"]
+                       , Assign "x" (AInt 3)
+                       ]
+                , seqs [ ints ["x", "y"]
+                       , Assign "x" (AInt 3), Assign "y" (AMul (AInt 4) (AId "x"))
+                       ]
+                , seqs [ ints ["x", "y"]
+                       , Assign "x" (AInt 3), Assign "y" (AMul (AInt 4) (AId "z"))
+                       ]
+                , seqs [ ints ["s", "n"]
+                       , Assign "n" (AInt 10)
+                       , Loop (BNot (BLE (AId "n") (AInt 0))) (seqs [ Assign "s" (APlus (AId "s") (AId "n")) , Assign "n" (AMinus (AId "n") (AInt 1)) ])
+                       ]
                 ]
 
 emptyConfig :: Stmt -> Configuration
