@@ -72,7 +72,8 @@ imp_k_llvm_kompiled := $(imp_k_llvm_dir)/imp-k-kompiled/interpreter
 
 imp_k_haskell_dir      := $(imp_k_dir)/haskell
 imp_k_haskell_files    := $(imp_k_haskell_dir)/imp-k.k
-imp_k_haskell_kompiled := $(imp_k_haskell_dir)/imp-k-kompiled/definition.kore
+#imp_k_haskell_kompiled := $(imp_k_haskell_dir)/imp-k-kompiled/definition.kore
+imp_k_haskell_kompiled := $(imp_k_haskell_dir)/imp-k-kompiled/compiled.txt
 
 # Tangle definition from *.md files
 
@@ -102,7 +103,7 @@ $(imp_k_llvm_kompiled): $(imp_k_llvm_files)
 	                 $(KOMPILE_OPTS)
 
 $(imp_k_haskell_kompiled): $(imp_k_haskell_files)
-	$(K_BIN)/kompile --main-module $(imp_k_module) --backend haskell              \
+	$(K_BIN)/kompile --main-module $(imp_k_module) --backend java                 \
 	                 --syntax-module $(imp_k_module) $(imp_k_haskell_dir)/imp-k.k \
 	                 --directory $(imp_k_haskell_dir) -I $(imp_k_haskell_dir)     \
 	                 $(KOMPILE_OPTS)
