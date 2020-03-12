@@ -8,4 +8,10 @@
     nprimes |-> 1033
     tester |-> 8233
   </mem>
+  <procs>
+    .Map
+  </procs>
+  <callStack>
+    .List
+  </callStack>
 </imp>

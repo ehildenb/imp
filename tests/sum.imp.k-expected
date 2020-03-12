@@ -6,4 +6,10 @@
     n |-> 0
     s |-> 55
   </mem>
+  <procs>
+    .Map
+  </procs>
+  <callStack>
+    .List
+  </callStack>
 </imp>
