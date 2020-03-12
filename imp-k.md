@@ -44,6 +44,9 @@ There is one special result `div-zero-error`, which division by zero leads to.
 This error halts execution immediately (has no semantic rules).
 
 ```k
+    syntax Pgm ::= "div-zero-error"
+ // -------------------------------
+
     syntax AExp ::= Int | Id
                   | AExp "/" AExp [left, seqstrict]
                   | AExp "*" AExp [left, seqstrict]
@@ -51,10 +54,11 @@ This error halts execution immediately (has no semantic rules).
                   | AExp "+" AExp [left, seqstrict]
                   | "(" AExp ")"  [bracket]
  // ---------------------------------------
-    rule <k> I1 + I2 => I1 +Int I2 ... </k>
-    rule <k> I1 - I2 => I1 -Int I2 ... </k>
-    rule <k> I1 * I2 => I1 *Int I2 ... </k>
-    rule <k> I1 / I2 => I1 /Int I2 ... </k> requires I2 =/=Int 0
+    rule <k> I1 + I2 => I1 +Int I2     ... </k>
+    rule <k> I1 - I2 => I1 -Int I2     ... </k>
+    rule <k> I1 * I2 => I1 *Int I2     ... </k>
+    rule <k>  I / 0  => div-zero-error ... </k>
+    rule <k> I1 / I2 => I1 /Int I2     ... </k> requires I2 =/=Int 0
 ```
 
 ### Boolean Expressions
