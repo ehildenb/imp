@@ -27,21 +27,15 @@ Results
 -------
 
 Here we inform K that both sorts `Int` and `Bool` should be considered fully-evaluated results/values.
+This affects the way that heating/cooling rules for the `strict` attribute are produced.
 
 ```k
-    syntax Value ::= Int | Bool
- // ---------------------------
+    syntax KResult ::= Int | Bool
+ // -----------------------------
 ```
 
 Expressions
 -----------
-
-### Evaluation
-
-```k
-    syntax Exp ::= AExp | BExp
- // --------------------------
-```
 
 ### Arithmetic Expressions
 
@@ -51,22 +45,16 @@ This error halts execution immediately (has no semantic rules).
 
 ```k
     syntax AExp ::= Int | Id
-                  | AExp "/" AExp [left]
-                  | AExp "*" AExp [left]
-                  > AExp "-" AExp [left]
-                  | AExp "+" AExp [left]
+                  | AExp "/" AExp [left, seqstrict]
+                  | AExp "*" AExp [left, seqstrict]
+                  > AExp "-" AExp [left, seqstrict]
+                  | AExp "+" AExp [left, seqstrict]
                   | "(" AExp ")"  [bracket]
  // ---------------------------------------
-
-    syntax Int ::= evalAExp ( AExp ) [function]
- // -------------------------------------------
-    rule    evalAExp ( I:Int ) => I
-    rule [[ evalAExp ( X:Id  ) => V ]] <mem> ... X |-> V ... </mem>
-
-    rule evalAExp ( I1 + I2 ) => evalAExp ( I1 ) +Int evalAExp ( I2 )
-    rule evalAExp ( I1 - I2 ) => evalAExp ( I1 ) -Int evalAExp ( I2 )
-    rule evalAExp ( I1 * I2 ) => evalAExp ( I1 ) *Int evalAExp ( I2 )
-    rule evalAExp ( I1 / I2 ) => evalAExp ( I1 ) /Int evalAExp ( I2 ) requires I2 =/=Int 0
+    rule <k> I1 + I2 => I1 +Int I2 ... </k>
+    rule <k> I1 - I2 => I1 -Int I2 ... </k>
+    rule <k> I1 * I2 => I1 *Int I2 ... </k>
+    rule <k> I1 / I2 => I1 /Int I2 ... </k> requires I2 =/=Int 0
 ```
 
 ### Boolean Expressions
@@ -75,23 +63,19 @@ IMP has `BExp` for boolean expressions.
 
 ```k
     syntax BExp ::= Bool
-                  | AExp "<=" AExp
-                  | AExp "<" AExp
-                  | AExp "==" AExp
-                  | "!" BExp
-                  > BExp "&&" BExp [left]
+                  | AExp "<=" AExp [seqstrict]
+                  | AExp "<" AExp  [seqstrict]
+                  | AExp "==" AExp [seqstrict]
+                  | "!" BExp       [strict]
+                  > BExp "&&" BExp [left, strict(1)]
                   | "(" BExp ")"   [bracket]
  // ----------------------------------------
-
-    syntax Bool ::= evalBExp ( BExp ) [function]
- // --------------------------------------------
-    rule evalBExp ( I1 <= I2    ) => evalAExp ( I1 ) <=Int evalAExp ( I2 )
-    rule evalBExp ( I1 <  I2    ) => evalAExp ( I1 )  <Int evalAExp ( I2 )
-    rule evalBExp ( I1 == I2    ) => evalAExp ( I1 ) ==Int evalAExp ( I2 )
-    rule evalBExp ( ! B:Bool    ) => notBool evalBExp ( B )
-    rule evalBExp ( B1    && B2 ) => evalBExp( evalBExp ( B1 ) && B2 ) requires notBool isBool(B1)
-    rule evalBExp ( true  && B2 ) => evalBExp ( B2 )
-    rule evalBExp ( false && B2 ) => false
+    rule <k> I1 <= I2   => I1 <=Int I2 ... </k>
+    rule <k> I1 <  I2   => I1 <Int  I2 ... </k>
+    rule <k> I1 == I2   => I1 ==Int I2 ... </k>
+    rule <k> ! T:Bool   => notBool T   ... </k>
+    rule <k> true  && B => B           ... </k>
+    rule <k> false && _ => false       ... </k>
 ```
 
 Statements
@@ -130,11 +114,10 @@ New variables can be declared with declaration `int_;` (and they are immediately
 Lookup and assignment (`_=_;`) read/affect the contents of the `<mem>` cell, for storing/retrieving values.
 
 ```k
-    syntax Stmt ::= Id "=" AExp ";"
- // -------------------------------
-    rule <k> X = ( AE => evalAExp(AE) ) ; => . ... </k> requires notBool isInt(AE)
-    rule <k> X = I:Int ; => . ... </k>
-         <mem> ... X |-> (_ => I) ... </mem>
+    syntax Stmt ::= Id "=" AExp ";" [strict(2)]
+ // -------------------------------------------
+    rule <k> X:Id        => I ... </k> <mem> ... X |-> I        ... </mem>
+    rule <k> X = I:Int ; => . ... </k> <mem> ... X |-> (_ => I) ... </mem>
 ```
 
 Control Flow
@@ -143,10 +126,10 @@ Control Flow
 IMP has `if(_)_else_` for choice, `while(_)_` for looping, and `__` for sequencing statements.
 
 ```k
-    syntax Stmt ::= "if" "(" BExp ")" Block "else" Block
- // ----------------------------------------------------
-    rule <k> if ( C ) B1 else B2 => B1 ... </k> requires         evalBExp(C)
-    rule <k> if ( C ) B1 else B2 => B2 ... </k> requires notBool evalBExp(C)
+    syntax Stmt ::= "if" "(" BExp ")" Block "else" Block [strict(1)]
+ // ----------------------------------------------------------------
+    rule <k> if (true)  B1 else _  => B1 ... </k>
+    rule <k> if (false) _  else B2 => B2 ... </k>
 
     syntax Stmt ::= "while" "(" BExp ")" Block
  // ------------------------------------------
