@@ -4,6 +4,7 @@ IMP Language
 ```k
 module IMP
     imports BOOL
+    imports ID
     imports INT
     imports MAP
     imports LIST
