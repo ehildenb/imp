@@ -3,7 +3,7 @@ int finalSum;
 def sum ( n ) {
     int s;
     s = 0;
-    while (0 <= n) {
+    while (! (n <= 0) ) {
         s = s + n;
         n = n - 1;
     }

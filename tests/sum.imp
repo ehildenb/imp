@@ -1,7 +1,7 @@
 int n, s;
 n = 10;
 s = 0;
-while (0 <= n) {
+while (! (n <= 0) ) {
     s = s + n;
     n = n - 1;
 }
