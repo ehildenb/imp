@@ -165,7 +165,7 @@ IMP procedures can return `Int`.
     syntax KResult ::= Ints
  // -----------------------
 
-    syntax Ints  ::= List{Int, ","}  [seqstrict, prefer]
+    syntax Ints  ::= List{Int, ","}
     syntax AExps ::= Ints | Ids
                    | List{AExp, ","} [seqstrict]
  // --------------------------------------------
@@ -175,7 +175,7 @@ IMP procedures can return `Int`.
 
     syntax AExp ::= Id "(" AExps ")" [strict(2)]
  // --------------------------------------------
-    rule <k> (FNAME:Id ( ARGS:Ints ) => FBODY) ~> CONT </k>
+    rule <k> FNAME:Id ( ARGS:Ints ) ~> CONT => FBODY </k>
          <mem> MEM => makeBindings(PARAMS, ARGS) </mem>
          <callStack> (.List => ListItem({ MEM | CONT })) ... </callStack>
          <procs> ... FNAME |-> def FNAME ( PARAMS ) FBODY ... </procs>
