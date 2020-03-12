@@ -19,8 +19,10 @@ The `<k>` cell will store the remainder of the current program (the continuation
 ```k
     configuration
       <imp>
-        <k>   $PGM:Stmt </k>
-        <mem> .Map      </mem>
+        <k>         $PGM:Stmt </k>
+        <mem>       .Map      </mem>
+        <procs>     .Map      </procs>
+        <callStack> .List     </callStack>
       </imp>
 ```
 
@@ -147,6 +149,47 @@ IMP has `if(_)_else_` for choice, `while(_)_` for looping, and `__` for sequenci
 
 ```k
     syntax priority int_;_IMP _=_;_IMP if(_)_else__IMP while(_)__IMP > ___IMP
+```
+
+Procedures
+----------
+
+IMP procedures can return `Int`.
+
+```k
+    syntax Stmt ::= "def" Id "(" Ids ")" Block
+ // ------------------------------------------
+    rule <k> def FNAME ( VS ) FBODY => . ... </k>
+         <procs> PS => PS [ FNAME <- def FNAME ( VS ) FBODY ] </procs>
+
+    syntax KResult ::= Ints
+ // -----------------------
+
+    syntax Ints  ::= List{Int, ","}  [seqstrict, prefer]
+    syntax AExps ::= List{AExp, ","} [seqstrict]
+                   | Ints
+ // --------------------------------------------
+
+    syntax Continuation ::= "{" Map "|" K "}"
+ // -----------------------------------------
+
+    syntax AExp ::= Id "(" AExps ")" [strict(2)]
+ // --------------------------------------------
+    rule <k> (FNAME:Id ( ARGS:Ints ) => FBODY) ~> CONT </k>
+         <mem> MEM => makeBindings(PARAMS, ARGS) </mem>
+         <callStack> (.List => ListItem({ MEM | CONT })) ... </callStack>
+         <procs> ... FNAME |-> def FNAME ( PARAMS ) FBODY ... </procs>
+
+    syntax Stmt ::= "return" AExp ";" [strict]
+ // ------------------------------------------
+    rule <k> return I:Int ; ~> _ => I ~> CONT </k>
+         <mem> _ => MEM </mem>
+         <callStack> (ListItem({ MEM | CONT }) => .List) ... </callStack>
+
+    syntax Map ::= makeBindings ( Ids , Ints ) [function]
+ // -----------------------------------------------------
+    rule makeBindings(.Ids, .Ints)      => .Map
+    rule makeBindings((X, XS), (I, IS)) => makeBindings(XS, IS) [ X <- I ]
 ```
 
 ```k
