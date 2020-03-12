@@ -166,7 +166,7 @@ IMP procedures can return `Int`.
  // -----------------------
 
     syntax Ints  ::= List{Int, ","}  [seqstrict, prefer]
-    syntax AExps ::= Ints
+    syntax AExps ::= Ints | Ids
                    | List{AExp, ","} [seqstrict]
  // --------------------------------------------
 
