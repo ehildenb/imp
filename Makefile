@@ -66,7 +66,7 @@ KOMPILE_OPTS += -ccopt -std=c++14 -O2
 build-imp: $(imp_llvm_kompiled) $(imp_haskell_kompiled)
 
 imp_module := IMP
-imp_dir    := $(DEFN_DIR)/k/imp
+imp_dir    := $(DEFN_DIR)/imp
 
 imp_llvm_dir      := $(imp_dir)/llvm
 imp_llvm_files    := $(imp_llvm_dir)/imp.k
@@ -85,23 +85,23 @@ $(imp_haskell_dir)/%.k: %.md $(TANGLER)
 	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
 
 $(imp_llvm_kompiled): $(imp_llvm_files)
-	$(K_BIN)/kompile --main-module $(imp_module) --backend llvm              \
-	                 --syntax-module $(imp_module) $(imp_llvm_dir)/imp.k \
-	                 --directory $(imp_llvm_dir) -I $(imp_llvm_dir)        \
-	                 $(KOMPILE_OPTS)
+	kompile --main-module $(imp_module) --backend llvm              \
+	        --syntax-module $(imp_module) $(imp_llvm_dir)/imp.k \
+	        --directory $(imp_llvm_dir) -I $(imp_llvm_dir)        \
+	        $(KOMPILE_OPTS)
 
 $(imp_haskell_kompiled): $(imp_haskell_files)
-	$(K_BIN)/kompile --main-module $(imp_module) --backend java                 \
-	                 --syntax-module $(imp_module) $(imp_haskell_dir)/imp.k \
-	                 --directory $(imp_haskell_dir) -I $(imp_haskell_dir)     \
-	                 $(KOMPILE_OPTS)
+	kompile --main-module $(imp_module) --backend java                 \
+	        --syntax-module $(imp_module) $(imp_haskell_dir)/imp.k \
+	        --directory $(imp_haskell_dir) -I $(imp_haskell_dir)     \
+	        $(KOMPILE_OPTS)
 
 ### FUN
 
 build-fun: $(fun_llvm_kompiled) $(fun_haskell_kompiled)
 
 fun_module := FUN
-fun_dir    := $(DEFN_DIR)/k/fun
+fun_dir    := $(DEFN_DIR)/fun
 
 fun_llvm_dir      := $(fun_dir)/llvm
 fun_llvm_files    := $(fun_llvm_dir)/fun.k
@@ -120,16 +120,16 @@ $(fun_haskell_dir)/%.k: %.md $(TANGLER)
 	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
 
 $(fun_llvm_kompiled): $(fun_llvm_files)
-	$(K_BIN)/kompile --main-module $(fun_module) --backend llvm              \
-	                 --syntax-module $(fun_module) $(fun_llvm_dir)/fun.k \
-	                 --directory $(fun_llvm_dir) -I $(fun_llvm_dir)        \
-	                 $(KOMPILE_OPTS)
+	kompile --main-module $(fun_module) --backend llvm              \
+	        --syntax-module $(fun_module) $(fun_llvm_dir)/fun.k \
+	        --directory $(fun_llvm_dir) -I $(fun_llvm_dir)        \
+	        $(KOMPILE_OPTS)
 
 $(fun_haskell_kompiled): $(fun_haskell_files)
-	$(K_BIN)/kompile --main-module $(fun_module) --backend java                 \
-	                 --syntax-module $(fun_module) $(fun_haskell_dir)/fun.k \
-	                 --directory $(fun_haskell_dir) -I $(fun_haskell_dir)     \
-	                 $(KOMPILE_OPTS)
+	kompile --main-module $(fun_module) --backend java                 \
+	        --syntax-module $(fun_module) $(fun_haskell_dir)/fun.k \
+	        --directory $(fun_haskell_dir) -I $(fun_haskell_dir)     \
+	        $(KOMPILE_OPTS)
 
 # Test
 # ----
