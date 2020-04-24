@@ -26,8 +26,7 @@ LUA_PATH                := $(PANDOC_TANGLE_SUBMODULE)/?.lua;;
 export TANGLER
 export LUA_PATH
 
-.PHONY: clean distclean           \
-        deps deps-k deps-tangle   \
+.PHONY: all clean distclean deps  \
         build build-imp build-fun \
         test test-imp test-fun
 
@@ -43,10 +42,7 @@ distclean: clean
 # Dependencies
 # ------------
 
-deps: deps-k deps-tangle
-
-deps-k:      $(K_RELEASE)/lib/java/kernel-1.0-SNAPSHOT.jar
-deps-tangle: $(TANGLER)
+deps: $(K_RELEASE)/lib/java/kernel-1.0-SNAPSHOT.jar
 
 $(K_RELEASE)/lib/java/kernel-1.0-SNAPSHOT.jar:
 	mkdir -p $(BUILD_DIR)
@@ -55,9 +51,6 @@ $(K_RELEASE)/lib/java/kernel-1.0-SNAPSHOT.jar:
 	mkdir -p $(K_RELEASE)
 	tar --extract --file $(K_RELEASE_TAR) --strip-components 1 --directory $(K_RELEASE)
 	krun --version
-
-$(TANGLER):
-	git submodule update --init -- $(PANDOC_TANGLE_SUBMODULE)
 
 # Building
 # --------
