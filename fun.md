@@ -536,7 +536,7 @@ If the resulting closure invokes the stored `cc(RHO, K)`, the current state is r
  // -----------------------------
     rule isVal(callcc) => true
 
-    rule <k> (callcc V:Val => V cc(RHO, K)) ~> K </k>
+    rule <k> (callcc ~> #arg(V) => V cc(RHO, K)) ~> K </k>
          <env> RHO </env>
 
     rule <k> cc(RHO, K) ~> #arg(V) ~> _ => setEnv(RHO) ~> V ~> K </k>
