@@ -152,7 +152,7 @@ prove_imp_files := $(wildcard tests/*-spec.k)
 test-imp: $(test_imp_files:=.run) $(prove_imp_files:=.prove)
 
 tests/%.imp.run: tests/%.imp.out
-	$(CHECK) $< tests/$*.imp.k-expected
+	$(CHECK) $< tests/$*.imp.expected
 
 tests/%-spec.k.prove: tests/%-spec.k.out
 	$(CHECK) $< tests/$*-spec.k.expected
@@ -173,7 +173,7 @@ prove_fun_files := $(wildcard tests/*-spec.k)
 test-fun: $(test_fun_files:=.run)
 
 tests/%.fun.run: tests/%.fun.out
-	$(CHECK) $< tests/$*.fun.k-expected
+	$(CHECK) $< tests/$*.fun.expected
 
 tests/%-spec.k.prove: tests/%-spec.k.out
 	$(CHECK) $< tests/$*-spec.k.expected
