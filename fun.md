@@ -427,12 +427,10 @@ In evaluating an application, the arguments are evaluated in reverse order until
     syntax Arg   ::= #arg   ( Val )
     syntax KItem ::= #apply ( Exp )
  // -------------------------------
-    rule <k> applyExp(E:Exp, V) => E ~> #arg(V) ... </k>
+    rule <k> applyExp(E:Exp, V)  => E ~> #arg(V)    ... </k>
+    rule <k> applyExp(E, E':Exp) => E' ~> #apply(E) ... </k> requires notBool isVal(E')
 
     rule <k> CV:ConstructorVal ~> #arg(V) => CV V ... </k>
-
-    rule <k> E E':Exp => E' ~> #apply(E) ... </k>
-      requires notBool isVal(E')
 
     rule <k> V:Val ~> #apply(E) => E V ... </k>
 ```
