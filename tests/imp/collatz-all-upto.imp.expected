@@ -1,0 +1,17 @@
+<imp>
+  <k>
+    .
+  </k>
+  <mem>
+    b |-> 2000
+    c |-> 2001
+    n |-> 1
+    x |-> 134100
+  </mem>
+  <procs>
+    .Map
+  </procs>
+  <callStack>
+    .List
+  </callStack>
+</imp>

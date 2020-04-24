@@ -1,3 +1,5 @@
+// curprime |-> 8233  n |-> 1033  nprimes |-> 1033  tester |-> 8233
+
 int n, nprimes, curprime, tester;
 n        = 1033;
 nprimes  = 1;

@@ -1,0 +1,16 @@
+<imp>
+  <k>
+    .
+  </k>
+  <mem>
+    b |-> 11
+    n |-> 1
+    x |-> 67
+  </mem>
+  <procs>
+    .Map
+  </procs>
+  <callStack>
+    .List
+  </callStack>
+</imp>

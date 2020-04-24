@@ -1,0 +1,15 @@
+<imp>
+  <k>
+    .
+  </k>
+  <mem>
+    x |-> -1
+    y |-> 22
+  </mem>
+  <procs>
+    .Map
+  </procs>
+  <callStack>
+    .List
+  </callStack>
+</imp>
