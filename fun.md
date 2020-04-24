@@ -596,30 +596,25 @@ The following auxiliary operations extract the list of identifiers and of expres
     rule <k> matchResult(BS) ~> getMatching (E , V  ) => getMatching (E , V  ) ~> matchResult(BS) ... </k>
 
     rule <k> getMatching(B:Bool,   B':Bool)   => matchResult(.Bindings) ... </k> requires B  ==Bool   B'
-    rule <k> getMatching(B:Bool,   B':Bool)   => matchFailure           ... </k> requires B =/=Bool   B'
     rule <k> getMatching(I:Int,    I':Int)    => matchResult(.Bindings) ... </k> requires I  ==Int    I'
-    rule <k> getMatching(I:Int,    I':Int)    => matchFailure           ... </k> requires I =/=Int    I'
     rule <k> getMatching(S:String, S':String) => matchResult(.Bindings) ... </k> requires S  ==String S'
-    rule <k> getMatching(S:String, S':String) => matchFailure           ... </k> requires S =/=String S'
 
     rule <k> getMatching(N:Name, V:Val) => matchResult(N = V) ... </k>
 
     rule <k> getMatching(C:ConstructorName , C':ConstructorName) => matchResult(.Bindings) ... </k> requires C  ==K C'
-    rule <k> getMatching(C:ConstructorName , C':ConstructorName) => matchFailure           ... </k> requires C =/=K C'
 
     rule <k> getMatching(E:Exp E':Exp , CV:ConstructorVal V':Val) => getMatching(E, CV) ~> getMatching(E', V') ... </k>
-    rule <k> getMatching(E:Exp E':Exp , CN:ConstructorName      ) => matchFailure                              ... </k>
-    rule <k> getMatching(E:Exp        , CV:ConstructorVal V':Val) => matchFailure                              ... </k> requires notBool (isName(E) orBool isApplication(E))
 
     rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k>
     rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k>
 
-    rule <k> getMatchings(E:Exp,             .Vals            ) => matchFailure                              ... </k> requires notBool isName(E)
-    rule <k> getMatchings((_:Exp : _:Exps ), .Vals            ) => matchFailure                              ... </k>
-    rule <k> getMatchings(.Vals,             (_:Val : _:Vals) ) => matchFailure                              ... </k>
+    rule <k> getMatching(_, _) => matchFailure ... </k> [owise]
+
     rule <k> getMatchings(.Vals,             .Vals            ) => matchResult(.Bindings)                    ... </k>
     rule <k> getMatchings(X:Name,            VS:Vals          ) => matchResult(X = #listTailMatch(VS))       ... </k>
     rule <k> getMatchings((E:Exp : ES:Exps), (V:Val : VS:Vals)) => getMatching(E, V) ~> getMatchings(ES, VS) ... </k>
+
+    rule <k> getMatchings(_, _) => matchFailure ... </k> [owise]
 
     syntax Val ::= #listTailMatch ( Vals )
  // --------------------------------------
