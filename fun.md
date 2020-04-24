@@ -193,7 +193,10 @@ Again, the type system will reject type-incorrect programs.
     syntax Exp ::= "fun" Cases [klabel(fun), symbol]
  // ------------------------------------------------
 
-    syntax Case ::= "->" Exp
+    syntax EmptyCase ::= "->" Exp
+ // -----------------------------
+
+    syntax Case ::= EmptyCase
                   | Exp Case [klabel(casePattern), symbol]
  // ------------------------------------------------------
 
@@ -441,13 +444,9 @@ The environment will be used at execution time to lookup non-parameter variables
 
     syntax Bool ::= isEmptyClosureVal ( Val ) [function]
  // ----------------------------------------------------
-    rule isEmptyClosureVal(V) => false requires notBool isClosureVal(V)
-
-    rule isEmptyClosureVal(closure(_, -> E | _)) => true
-    rule isEmptyClosureVal(closure(_, _ _  | _)) => false
-
-    rule isEmptyClosureVal(closure(_, -> E | _, _, _)) => true
-    rule isEmptyClosureVal(closure(_, _ _  | _, _, _)) => false
+    rule isEmptyClosureVal(closure(_, _:EmptyCase | _))       => true
+    rule isEmptyClosureVal(closure(_, _:EmptyCase | _, _, _)) => true
+    rule isEmptyClosureVal(_)                                 => false [owise]
 
     syntax Bool ::= fullyEvaluated ( Vals ) [function]
  // --------------------------------------------------
