@@ -1,1 +1,11 @@
-[ 6 : 7 : 8 : [ ] ]
+<FUN>
+  <k>
+    [ 6 : 7 : 8 : .Vals ]
+  </k>
+  <env>
+    .Map
+  </env>
+  <envs>
+    .List
+  </envs>
+</FUN>

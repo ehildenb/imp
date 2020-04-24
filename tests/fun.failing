@@ -5,10 +5,7 @@ tests/fun/exceptions-branch-shadowing.fun
 tests/fun/exceptions.fun
 tests/fun/exceptions-simple.fun
 tests/fun/factorial-and-list-max.fun
-tests/fun/fold.fun
-tests/fun/fold-sum.fun
 tests/fun/list-max.fun
-tests/fun/map.fun
 tests/fun/nats.fun
 tests/fun/nth.fun
 tests/fun/pattern.fun
