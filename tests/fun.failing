@@ -1,5 +1,1 @@
-tests/fun/exceptions-branch.fun
-tests/fun/exceptions-branch-shadowing.fun
-tests/fun/exceptions.fun
-tests/fun/exceptions-simple.fun
 tests/fun/nats.fun
