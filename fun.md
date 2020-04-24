@@ -118,7 +118,7 @@ A list is turned back into a regular element by wrapping it in the `[_]` operato
 ### Expressions
 
 We next define the syntax of arithmetic constructs, together with their relative priorities and left-/non-associativities.
-We also tag all these rules with a new tag, "arith", so we can more easily define global syntax priirities later (at the end of the syntax module).
+We also tag all these rules with a new tag, "arith", so we can more easily define global syntax priorities later (at the end of the syntax module).
 
 **TODO**: Left attribute on `_^_` and `_+_` should not be necessary; currently a parsing bug.
           The "prefer" attribute above is to not parse x-1 as x(-1).
@@ -356,7 +356,6 @@ Lookup
 ```k
     rule <k> X:Name => V ... </k>
          <env> ... X |-> V ... </env>
-      [tag(lookup)]
 ```
 
 Expressions
@@ -404,8 +403,8 @@ Conditional
 Because the conditional is declared `strict`, we only need to provide the semantics in terms of values.
 
 ```k
-    rule <k> if  true then E else _ => E ... </k> [tag(iftrue)]
-    rule <k> if false then _ else E => E ... </k> [tag(iffalse)]
+    rule <k> if  true then E else _ => E ... </k>
+    rule <k> if false then _ else E => E ... </k>
 ```
 
 Functions and Closures
@@ -428,15 +427,12 @@ In evaluating an application, the arguments are evaluated in reverse order until
     syntax Arg   ::= #arg   ( Val )
     syntax KItem ::= #apply ( Exp )
  // -------------------------------
-    rule <k> E:Exp V => E ~> #arg(V) ... </k>
-      requires notBool isVal(E)
-      [tag(applicationFocusFunction)]
+    rule <k> applyExp(E:Exp, V) => E ~> #arg(V) ... </k>
 
     rule <k> CV:ConstructorVal ~> #arg(V) => CV V ... </k>
 
     rule <k> E E':Exp => E' ~> #apply(E) ... </k>
       requires notBool isVal(E')
-      [tag(applicationFocusArgument)]
 
     rule <k> V:Val ~> #apply(E) => E V ... </k>
 ```
@@ -472,12 +468,12 @@ Closures defined in `let` bindings must only contain the environment of the `let
 Helpers `binds` and `bindsRec` ensure that the definitions are evaluated in the correct environment, before and after the bindings are allocated respectively.
 
 ```k
-    rule <k> let    BS in E => pushEnv ~> #exps(BS) ~> #assign  (#names(BS)) ~> E ~> popEnv ... </k> [tag(letBinds)]
-    rule <k> letrec BS in E => pushEnv ~> #exps(BS) ~> #assignMu(#names(BS)) ~> E ~> popEnv ... </k> [tag(letRecBinds)]
+    rule <k> let    BS in E => pushEnv ~> #exps(BS) ~> #assign  (#names(BS)) ~> E ~> popEnv ... </k>
+    rule <k> letrec BS in E => pushEnv ~> #exps(BS) ~> #assignMu(#names(BS)) ~> E ~> popEnv ... </k>
 
     syntax Exp ::= mu ( Names , Exp )
  // ---------------------------------
-    rule <k> mu ( .Names , E ) => E    ... </k> [tag(recCall)]
+    rule <k> mu ( .Names , E ) => E    ... </k>
 
     rule <k> mu ( (X , XS => XS) , E ) ... </k>
          <env> ENV => ENV[X <- ENV'[X]] </env>
@@ -497,11 +493,10 @@ The following helpers actually do the allocation and assignment operations on th
 
     rule <k> (#listTailMatch(V) : VS:Vals => VS) ~> #assign(X , XS => XS) ... </k>
          <env> ENV => ENV[X <- V] </env>
-      [tag(listAssignment)]
 
     rule <k> (V:Val : VS:Vals => VS) ~> #assign(X , XS => XS) ... </k>
          <env> ENV => ENV[X <- V] </env>
-      [owise, tag(assignment)]
+      [owise]
 ```
 
 This machinery actually ensures that the recursive expressions know which values they may access from the enclosing environment.
@@ -590,8 +585,8 @@ The following auxiliary operations extract the list of identifiers and of expres
 
     rule <k> matchResultAdd(.Bindings, N', V', BS') => matchResult(N' = V' and BS') ... </k>
 
-    rule <k> matchResultAdd(N:Name = V:Val and BS, N', V', BS') => matchResultAdd(BS, N', V' , N = V and BS') ... </k> requires N =/=K N'  orBool V  ==K V' [tag(caseNonlinearMatchJoinSuccess)]
-    rule <k> matchResultAdd(N:Name = V:Val and BS, N', V', BS') => matchFailure                               ... </k> requires N  ==K N' andBool V =/=K V' [tag(caseNonlinearMatchJoinFailure)]
+    rule <k> matchResultAdd(N:Name = V:Val and BS, N', V', BS') => matchResultAdd(BS, N', V' , N = V and BS') ... </k> requires N =/=K N'  orBool V  ==K V'
+    rule <k> matchResultAdd(N:Name = V:Val and BS, N', V', BS') => matchFailure                               ... </k> requires N  ==K N' andBool V =/=K V'
 
     syntax MatchResult ::= getMatching         ( Exp   , Val  )
                          | getMatchings        ( Exps  , Vals )
@@ -602,31 +597,31 @@ The following auxiliary operations extract the list of identifiers and of expres
     rule <k> matchResult(BS) ~> getMatchings(ES, VS') => getMatchings(ES, VS') ~> matchResult(BS) ... </k>
     rule <k> matchResult(BS) ~> getMatching (E , V  ) => getMatching (E , V  ) ~> matchResult(BS) ... </k>
 
-    rule <k> getMatching(B:Bool,   B':Bool)   => matchResult(.Bindings) ... </k> requires B  ==Bool   B' [tag(caseBoolSuccess)]
-    rule <k> getMatching(B:Bool,   B':Bool)   => matchFailure           ... </k> requires B =/=Bool   B' [tag(caseBoolFailure)]
-    rule <k> getMatching(I:Int,    I':Int)    => matchResult(.Bindings) ... </k> requires I  ==Int    I' [tag(caseIntSuccess)]
-    rule <k> getMatching(I:Int,    I':Int)    => matchFailure           ... </k> requires I =/=Int    I' [tag(caseIntFailure)]
-    rule <k> getMatching(S:String, S':String) => matchResult(.Bindings) ... </k> requires S  ==String S' [tag(caseStringSuccess)]
-    rule <k> getMatching(S:String, S':String) => matchFailure           ... </k> requires S =/=String S' [tag(caseStringFailure)]
+    rule <k> getMatching(B:Bool,   B':Bool)   => matchResult(.Bindings) ... </k> requires B  ==Bool   B'
+    rule <k> getMatching(B:Bool,   B':Bool)   => matchFailure           ... </k> requires B =/=Bool   B'
+    rule <k> getMatching(I:Int,    I':Int)    => matchResult(.Bindings) ... </k> requires I  ==Int    I'
+    rule <k> getMatching(I:Int,    I':Int)    => matchFailure           ... </k> requires I =/=Int    I'
+    rule <k> getMatching(S:String, S':String) => matchResult(.Bindings) ... </k> requires S  ==String S'
+    rule <k> getMatching(S:String, S':String) => matchFailure           ... </k> requires S =/=String S'
 
-    rule <k> getMatching(N:Name, V:Val) => matchResult(N = V) ... </k> [tag(caseNameSuccess)]
+    rule <k> getMatching(N:Name, V:Val) => matchResult(N = V) ... </k>
 
-    rule <k> getMatching(C:ConstructorName , C':ConstructorName) => matchResult(.Bindings) ... </k> requires C  ==K C' [tag(caseConstructorNameSuccess)]
-    rule <k> getMatching(C:ConstructorName , C':ConstructorName) => matchFailure           ... </k> requires C =/=K C' [tag(caseConstructorNameFailure)]
+    rule <k> getMatching(C:ConstructorName , C':ConstructorName) => matchResult(.Bindings) ... </k> requires C  ==K C'
+    rule <k> getMatching(C:ConstructorName , C':ConstructorName) => matchFailure           ... </k> requires C =/=K C'
 
-    rule <k> getMatching(E:Exp E':Exp , CV:ConstructorVal V':Val) => getMatching(E, CV) ~> getMatching(E', V') ... </k>                                                      [tag(caseConstructorArgsSuccess)]
-    rule <k> getMatching(E:Exp E':Exp , CN:ConstructorName      ) => matchFailure                              ... </k>                                                      [tag(caseConstructorArgsFailure1)]
-    rule <k> getMatching(E:Exp        , CV:ConstructorVal V':Val) => matchFailure                              ... </k> requires notBool (isName(E) orBool isApplication(E)) [tag(caseConstructorArgsFailure2)]
+    rule <k> getMatching(E:Exp E':Exp , CV:ConstructorVal V':Val) => getMatching(E, CV) ~> getMatching(E', V') ... </k>
+    rule <k> getMatching(E:Exp E':Exp , CN:ConstructorName      ) => matchFailure                              ... </k>
+    rule <k> getMatching(E:Exp        , CV:ConstructorVal V':Val) => matchFailure                              ... </k> requires notBool (isName(E) orBool isApplication(E))
 
-    rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k> [tag(caseListSuccess1)]
-    rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k> [tag(caseListSuccess2)]
+    rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k>
+    rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k>
 
-    rule <k> getMatchings(E:Exp,             .Vals            ) => matchFailure                              ... </k> requires notBool isName(E) [tag(caseListEmptyFailure1)]
-    rule <k> getMatchings((_:Exp : _:Exps ), .Vals            ) => matchFailure                              ... </k>                            [tag(caseListEmptyFailure2)]
-    rule <k> getMatchings(.Vals,             (_:Val : _:Vals) ) => matchFailure                              ... </k>                            [tag(caseListEmptyFailure3)]
-    rule <k> getMatchings(.Vals,             .Vals            ) => matchResult(.Bindings)                    ... </k>                            [tag(caseListEmptySuccess)]
-    rule <k> getMatchings(X:Name,            VS:Vals          ) => matchResult(X = #listTailMatch(VS))       ... </k>                            [tag(caseListSingletonSuccess)]
-    rule <k> getMatchings((E:Exp : ES:Exps), (V:Val : VS:Vals)) => getMatching(E, V) ~> getMatchings(ES, VS) ... </k>                            [tag(caseListNonemptySuccess)]
+    rule <k> getMatchings(E:Exp,             .Vals            ) => matchFailure                              ... </k> requires notBool isName(E)
+    rule <k> getMatchings((_:Exp : _:Exps ), .Vals            ) => matchFailure                              ... </k>
+    rule <k> getMatchings(.Vals,             (_:Val : _:Vals) ) => matchFailure                              ... </k>
+    rule <k> getMatchings(.Vals,             .Vals            ) => matchResult(.Bindings)                    ... </k>
+    rule <k> getMatchings(X:Name,            VS:Vals          ) => matchResult(X = #listTailMatch(VS))       ... </k>
+    rule <k> getMatchings((E:Exp : ES:Exps), (V:Val : VS:Vals)) => getMatching(E, V) ~> getMatchings(ES, VS) ... </k>
 
     syntax Val ::= #listTailMatch ( Vals )
  // --------------------------------------
