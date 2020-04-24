@@ -586,26 +586,24 @@ The following auxiliary operations extract the list of identifiers and of expres
     rule <k> matchResultAdd(N:Name = V:Val and BS, N', V', BS') => matchResultAdd(BS, N', V' , N = V and BS') ... </k> requires N =/=K N'  orBool V  ==K V'
     rule <k> matchResultAdd(N:Name = V:Val and BS, N', V', BS') => matchFailure                               ... </k> requires N  ==K N' andBool V =/=K V'
 
-    syntax MatchResult ::= getMatching         ( Exp   , Val  )
-                         | getMatchings        ( Exps  , Vals )
-                         | getMatchingBindings ( Exp   , Val , Bindings )
- // ---------------------------------------------------------------------
+    syntax MatchResult ::= getMatching         ( Exp  , Val  )
+                         | getMatchings        ( Exps , Vals )
+                         | getMatchingBindings ( Exp  , Val , Bindings )
+ // --------------------------------------------------------------------
     rule <k> getMatchingBindings(E, V, BS) => getMatching(E, V) ~> matchResult(BS) ... </k>
 
     rule <k> matchResult(BS) ~> getMatchings(ES, VS') => getMatchings(ES, VS') ~> matchResult(BS) ... </k>
     rule <k> matchResult(BS) ~> getMatching (E , V  ) => getMatching (E , V  ) ~> matchResult(BS) ... </k>
 
-    rule <k> getMatching(B:Bool,   B':Bool)   => matchResult(.Bindings) ... </k> requires B  ==Bool   B'
-    rule <k> getMatching(I:Int,    I':Int)    => matchResult(.Bindings) ... </k> requires I  ==Int    I'
-    rule <k> getMatching(S:String, S':String) => matchResult(.Bindings) ... </k> requires S  ==String S'
+    rule <k> getMatching ( B:Bool             , B':Bool            ) => matchResult(.Bindings) ... </k> requires B ==Bool   B'
+    rule <k> getMatching ( I:Int              , I':Int             ) => matchResult(.Bindings) ... </k> requires I ==Int    I'
+    rule <k> getMatching ( S:String           , S':String          ) => matchResult(.Bindings) ... </k> requires S ==String S'
+    rule <k> getMatching ( C:ConstructorName  , C':ConstructorName ) => matchResult(.Bindings) ... </k> requires C ==K      C'
 
     rule <k> getMatching(N:Name, V:Val) => matchResult(N = V) ... </k>
 
-    rule <k> getMatching(C:ConstructorName , C':ConstructorName) => matchResult(.Bindings) ... </k> requires C  ==K C'
-
     rule <k> getMatching(E:Exp E':Exp , CV:ConstructorVal V':Val) => getMatching(E, CV) ~> getMatching(E', V') ... </k>
 
-    rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k>
     rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k>
 
     rule <k> getMatching(_, _) => matchFailure ... </k> [owise]
