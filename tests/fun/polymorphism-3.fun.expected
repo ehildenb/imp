@@ -1,1 +1,18 @@
-val ( closure ( f00 |-> 0 f01 |-> 1 f02 |-> 2 f03 |-> 3 , x -> f03 ( f03 x ) | .Cases ) )
+<FUN>
+  <k>
+    val ( closure ( f00 |-> val ( closure ( .Map , x -> ( fun y -> x | .Cases ) | .Cases , .Bindings , .Vals ) )
+    f01 |-> val ( closure ( f00 |-> val ( closure ( .Map , x -> ( fun y -> x | .Cases ) | .Cases , .Bindings , .Vals ) ) , x -> f00 ( f00 x ) | .Cases , .Bindings , .Vals ) )
+    f02 |-> val ( closure ( f00 |-> val ( closure ( .Map , x -> ( fun y -> x | .Cases ) | .Cases , .Bindings , .Vals ) )
+    f01 |-> val ( closure ( f00 |-> val ( closure ( .Map , x -> ( fun y -> x | .Cases ) | .Cases , .Bindings , .Vals ) ) , x -> f00 ( f00 x ) | .Cases , .Bindings , .Vals ) ) , x -> f01 ( f01 x ) | .Cases , .Bindings , .Vals ) )
+    f03 |-> val ( closure ( f00 |-> val ( closure ( .Map , x -> ( fun y -> x | .Cases ) | .Cases , .Bindings , .Vals ) )
+    f01 |-> val ( closure ( f00 |-> val ( closure ( .Map , x -> ( fun y -> x | .Cases ) | .Cases , .Bindings , .Vals ) ) , x -> f00 ( f00 x ) | .Cases , .Bindings , .Vals ) )
+    f02 |-> val ( closure ( f00 |-> val ( closure ( .Map , x -> ( fun y -> x | .Cases ) | .Cases , .Bindings , .Vals ) )
+    f01 |-> val ( closure ( f00 |-> val ( closure ( .Map , x -> ( fun y -> x | .Cases ) | .Cases , .Bindings , .Vals ) ) , x -> f00 ( f00 x ) | .Cases , .Bindings , .Vals ) ) , x -> f01 ( f01 x ) | .Cases , .Bindings , .Vals ) ) , x -> f02 ( f02 x ) | .Cases , .Bindings , .Vals ) ) , x -> f03 ( f03 x ) | .Cases , .Bindings , .Vals ) )
+  </k>
+  <env>
+    .Map
+  </env>
+  <envs>
+    .List
+  </envs>
+</FUN>

@@ -3,8 +3,8 @@
 letrec
     nat n m = if n == m then [ n : .Vals ]
                         else cons n (nat (n + 1) m)
-and length = fun [     ] -> 0
-             |   [h : t] -> 1 + length [ t ]
+and length = fun [       ] -> 0
+             |   [ h : t ] -> 1 + length [ t ]
 and nth = fun 1 [ h : t ] -> h
           |   n [ h : t ] -> nth (n - 1) [ t ]
 and cons h [ t ] = [ h : t ]

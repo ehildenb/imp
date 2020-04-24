@@ -1,1 +1,11 @@
-Pair (Pair 1 9) (Pair 0 1)
+<FUN>
+  <k>
+    Pair ( Pair 1 9 ) ( Pair 0 1 )
+  </k>
+  <env>
+    .Map
+  </env>
+  <envs>
+    .List
+  </envs>
+</FUN>
