@@ -443,7 +443,7 @@ On failure, the process is restarted on the next `Case` in the closure function 
 ```k
     rule <k> (val(closure(_, _, _, _) #as CL) => CL) ~> #arg(_) ... </k>
 
-    rule <k> (. => getMatchingBindings(P, V, BS)) ~> closure(RHO, (P C => C) | CS, BS => .Bindings, VS => V : VS) ~> (#arg(V) => .) ... </k>
+    rule <k> (. => getMatchBindings(P, V, BS)) ~> closure(RHO, (P C => C) | CS, BS => .Bindings, VS => V : VS) ~> (#arg(V) => .) ... </k>
 
     rule <k> (matchResult(BS) => .) ~> closure(RHO ,  _                  , _  => BS , VS          )                             ... </k>
     rule <k> (matchFailure    => .) ~> closure(RHO , (C:Case | CS => CS) , BS       , VS => .Vals ) ~> (. => #sequenceArgs(VS)) ... </k>
@@ -586,31 +586,26 @@ The following auxiliary operations extract the list of identifiers and of expres
     rule <k> matchResultAdd(N:Name = V:Val and BS, N', V', BS') => matchResultAdd(BS, N', V' , N = V and BS') ... </k> requires N =/=K N'  orBool V  ==K V'
     rule <k> matchResultAdd(N:Name = V:Val and BS, N', V', BS') => matchFailure                               ... </k> requires N  ==K N' andBool V =/=K V'
 
-    syntax MatchResult ::= getMatching         ( Exp  , Val  )
-                         | getMatchings        ( Exps , Vals )
-                         | getMatchingBindings ( Exp  , Val , Bindings )
- // --------------------------------------------------------------------
-    rule <k> getMatchingBindings(E, V, BS) => getMatching(E, V) ~> matchResult(BS) ... </k>
+    syntax MatchResult ::= getMatch         ( Exps , Vals           )
+                         | getMatchBindings ( Exp  , Val , Bindings )
+ // -----------------------------------------------------------------
+    rule <k> getMatchBindings(E, V, BS) => getMatch(E, V) ~> matchResult(BS) ... </k>
 
-    rule <k> matchResult(BS) ~> getMatchings(ES, VS') => getMatchings(ES, VS') ~> matchResult(BS) ... </k>
-    rule <k> matchResult(BS) ~> getMatching (E , V  ) => getMatching (E , V  ) ~> matchResult(BS) ... </k>
+    rule <k> matchResult(BS) ~> getMatch(ES, VS) => getMatch (ES, VS) ~> matchResult(BS) ... </k>
 
-    rule <k> getMatching(V:Val, V':Val) => matchResult(.Bindings) ... </k> requires V ==K V'
+    rule <k> getMatch(VS:Vals, VS':Vals) => matchResult(.Bindings) ... </k> requires VS ==K VS'
 
-    rule <k> getMatching(N:Name, V:Val) => matchResult(N = V) ... </k>
+    rule <k> getMatch(N:Name, V:Val) => matchResult(N = V) ... </k>
 
-    rule <k> getMatching(E:Exp E':Exp , CV:ConstructorVal V':Val) => getMatching(E, CV) ~> getMatching(E', V') ... </k>
+    rule <k> getMatch(E:Exp E':Exp, CV:ConstructorVal V':Val) => getMatch(E, CV) ~> getMatch(E', V') ... </k>
 
-    rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k>
+    rule <k> getMatch([ ES ], [ VS ]) => getMatch(ES, VS) ... </k>
 
-    rule <k> getMatching(_, _) => matchFailure ... </k> [owise]
+    rule <k> getMatch(X:Name, VS:Vals ) => matchResult(X = #listTailMatch(VS)) ... </k>
 
-    rule <k> getMatchings(VS:Vals, VS':Vals) => matchResult(.Bindings) ... </k> requires VS ==K VS'
+    rule <k> getMatch((E:Exp : ES:Exps), (V:Val : VS:Vals)) => getMatch(E, V) ~> getMatch(ES, VS) ... </k>
 
-    rule <k> getMatchings(X:Name,            VS:Vals          ) => matchResult(X = #listTailMatch(VS))       ... </k>
-    rule <k> getMatchings((E:Exp : ES:Exps), (V:Val : VS:Vals)) => getMatching(E, V) ~> getMatchings(ES, VS) ... </k>
-
-    rule <k> getMatchings(_, _) => matchFailure ... </k> [owise]
+    rule <k> getMatch(_, _) => matchFailure ... </k> [owise]
 
     syntax Val ::= #listTailMatch ( Vals )
  // --------------------------------------
