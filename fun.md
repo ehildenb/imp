@@ -110,9 +110,9 @@ A list is turned back into a regular element by wrapping it in the `[_]` operato
 
 ```k
     syntax Exps ::= Vals
-    syntax Vals ::= Val | ".Vals" [klabel(.Vals), symbol] | Val ":" Vals
-    syntax Exps ::= Exp | ".Exps" [klabel(.Vals), symbol] | Exp ":" Exps
- // --------------------------------------------------------------------
+    syntax Vals ::= Val | ".Vals" | Val ":" Vals [prefer]
+    syntax Exps ::= Exp | ".Exps" | Exp ":" Exps
+ // --------------------------------------------
 
     syntax Val ::= "[" Vals "]" [klabel(valList), symbol]
     syntax Exp ::= "[" Exps "]" [klabel(expList), symbol]
@@ -286,7 +286,7 @@ To avoid syntactic ambiguities with the arrow construct for function cases, we u
                   | Type TypeName             [klabel(Type-TypeName)]
                   | "(" Types ")" TypeName    [prefer]
  // --------------------------------------------------
-    rule Type-TypeName(T:Type, Tn:TypeName) => (T) Tn [macro]
+    rule T:Type TN:TypeName => (T) TN [macro-rec]
 
     syntax Types ::= List{Type,","}
     syntax Types ::= TypeVars
@@ -453,11 +453,12 @@ The environment will be used at execution time to lookup non-parameter variables
     syntax Bool ::=  isFullyEvaluated ( Exp  ) [function]
                   | areFullyEvaluated ( Exps ) [function]
  // -----------------------------------------------------
-    rule isFullyEvaluated(E    ) => false                        requires notBool isVal(E)
-    rule isFullyEvaluated(V:Val) => notBool isEmptyClosureVal(V)
+    rule isFullyEvaluated(E    )       => false                        requires notBool isVal(E)
+    rule isFullyEvaluated(V:Val)       => notBool isEmptyClosureVal(V)
     rule isFullyEvaluated(valList(VS)) => areFullyEvaluated(VS)
     rule isFullyEvaluated(expList(VS)) => false
 
+    rule areFullyEvaluated(.Vals)  => true
     rule areFullyEvaluated(.Exps)  => true
     rule areFullyEvaluated(N:Name) => false
     rule areFullyEvaluated(E : ES) => isFullyEvaluated(E) andBool areFullyEvaluated(ES)
