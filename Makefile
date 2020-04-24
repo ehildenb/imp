@@ -26,8 +26,10 @@ LUA_PATH                := $(PANDOC_TANGLE_SUBMODULE)/?.lua;;
 export TANGLER
 export LUA_PATH
 
-.PHONY: all clean distclean deps  \
-        build build-imp build-fun \
+.PHONY: all clean distclean deps                   \
+        build                                      \
+        build-imp build-imp-llvm build-imp-haskell \
+        build-fun build-fun-llvm build-fun-haskell \
         test test-imp test-fun
 
 all: build
@@ -63,7 +65,9 @@ KOMPILE_OPTS += -ccopt -std=c++14 -O2
 
 ### IMP
 
-build-imp: $(imp_llvm_kompiled) $(imp_haskell_kompiled)
+build-imp: build-imp-llvm build-imp-haskell
+build-imp-llvm:    $(imp_llvm_kompiled)
+build-imp-haskell: $(imp_haskell_kompiled)
 
 imp_module := IMP
 imp_dir    := $(DEFN_DIR)/imp
@@ -98,7 +102,9 @@ $(imp_haskell_kompiled): $(imp_haskell_files)
 
 ### FUN
 
-build-fun: $(fun_llvm_kompiled) $(fun_haskell_kompiled)
+build-fun: build-fun-llvm build-fun-haskell
+build-fun-llvm:    $(fun_llvm_kompiled)
+build-fun-haskell: $(fun_haskell_kompiled)
 
 fun_module := FUN
 fun_dir    := $(DEFN_DIR)/fun
