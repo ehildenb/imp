@@ -89,15 +89,15 @@ $(imp_haskell_dir)/%.k: %.md $(TANGLER)
 	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
 
 $(imp_llvm_kompiled): $(imp_llvm_files)
-	kompile --main-module $(imp_module) --backend llvm              \
+	kompile --main-module $(imp_module) --backend llvm          \
 	        --syntax-module $(imp_module) $(imp_llvm_dir)/imp.k \
-	        --directory $(imp_llvm_dir) -I $(imp_llvm_dir)        \
+	        --directory $(imp_llvm_dir) -I $(imp_llvm_dir)      \
 	        $(KOMPILE_OPTS)
 
 $(imp_haskell_kompiled): $(imp_haskell_files)
-	kompile --main-module $(imp_module) --backend java                 \
+	kompile --main-module $(imp_module) --backend haskell          \
 	        --syntax-module $(imp_module) $(imp_haskell_dir)/imp.k \
-	        --directory $(imp_haskell_dir) -I $(imp_haskell_dir)     \
+	        --directory $(imp_haskell_dir) -I $(imp_haskell_dir)   \
 	        $(KOMPILE_OPTS)
 
 ### FUN
@@ -126,15 +126,15 @@ $(fun_haskell_dir)/%.k: %.md $(TANGLER)
 	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
 
 $(fun_llvm_kompiled): $(fun_llvm_files)
-	kompile --main-module $(fun_module) --backend llvm              \
+	kompile --main-module $(fun_module) --backend llvm          \
 	        --syntax-module $(fun_module) $(fun_llvm_dir)/fun.k \
-	        --directory $(fun_llvm_dir) -I $(fun_llvm_dir)        \
+	        --directory $(fun_llvm_dir) -I $(fun_llvm_dir)      \
 	        $(KOMPILE_OPTS)
 
 $(fun_haskell_kompiled): $(fun_haskell_files)
-	kompile --main-module $(fun_module) --backend java                 \
+	kompile --main-module $(fun_module) --backend haskell          \
 	        --syntax-module $(fun_module) $(fun_haskell_dir)/fun.k \
-	        --directory $(fun_haskell_dir) -I $(fun_haskell_dir)     \
+	        --directory $(fun_haskell_dir) -I $(fun_haskell_dir)   \
 	        $(KOMPILE_OPTS)
 
 # Test
