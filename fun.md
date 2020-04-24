@@ -73,19 +73,12 @@ Lists of expressions are declared strict, so all expressions in the list get eva
  // -----------------------------
 
     syntax ConstructorName
-    syntax ClosureVal
     syntax ConstructorVal ::= ConstructorName
                             | ConstructorVal Val [left, klabel(applyConstructor), symbol, prefer]
  // ---------------------------------------------------------------------------------------------
 
-    syntax ApplicableVal ::= ConstructorVal
-                           | ClosureVal
-                           | ApplicableVal Val [left, klabel(applyApplicable), symbol]
- // ----------------------------------------------------------------------------------
-
-    syntax Val ::= Int | Bool | String
-                 | ApplicableVal
- // ----------------------------
+    syntax Val ::= Int | Bool | String | ConstructorVal | val ( Exp )
+ // -----------------------------------------------------------------
 
     syntax Exp ::= Val | Name
                  | "(" Exp ")" [bracket]
@@ -98,8 +91,9 @@ Lists of expressions are declared strict, so all expressions in the list get eva
 
     syntax Bool ::= isApplication ( Exp ) [function]
  // ------------------------------------------------
-    rule isApplication(E:Exp E':Exp) => true
-    rule isApplication(_:Exp)        => false [owise]
+    rule isApplication(_:Exp            _:Exp) => true
+    rule isApplication(_:ConstructorVal _:Val) => true
+    rule isApplication(_)                      => false [owise]
 ```
 
 ### Builtin Lists
@@ -193,10 +187,7 @@ Again, the type system will reject type-incorrect programs.
     syntax Exp ::= "fun" Cases [klabel(fun), symbol]
  // ------------------------------------------------
 
-    syntax EmptyCase ::= "->" Exp
- // -----------------------------
-
-    syntax Case ::= EmptyCase
+    syntax Case ::= "->" Exp
                   | Exp Case [klabel(casePattern), symbol]
  // ------------------------------------------------------
 
@@ -306,7 +297,7 @@ These inform the parser of precedence information when ambiguous parses show up.
 
 ```k
     syntax priorities casePattern
-                    > applyConstructor applyApplicable applyExp
+                    > applyConstructor applyExp
                     > arith
                     > let letrec ite
                     > fun
@@ -396,26 +387,19 @@ Expressions
     rule <k> false || E      => E          ... </k>
 ```
 
-Lists must be handled carefully, because not every `ClosureVal` should be considered fully evaluated.
-
 ```k
     syntax KItem ::= "#expList"
  // ---------------------------
-    rule <k> expList(ES)         => ES ~> #expList ... </k>
-    rule <k> VS:Vals ~> #expList => valList(VS)    ... </k>
-      requires fullyEvaluated(VS)
+    rule <k> expList(ES) => ES ~> #expList      ... </k>
+    rule <k> VS:Vals ~> #expList => valList(VS) ... </k>
 
     syntax KItem ::= "#consHead" Val | "#consTail" Exps
  // ---------------------------------------------------
     rule <k> expCons(E:Exp, ES) => E ~> #consTail ES ... </k>
-    rule <k> valCons(V,     VS) => V ~> #consTail VS ... </k> requires notBool fullyEvaluated(V)
-    rule <k> valCons(V,     VS) => VS ~> #consHead V ... </k> requires notBool fullyEvaluated(VS)
 
     rule <k> V:Val ~> #consTail ES => ES ~> #consHead V ... </k>
-      requires fullyEvaluated(V)
 
     rule <k> VS:Vals ~> #consHead V => V : VS ... </k>
-      requires fullyEvaluated(VS)
 ```
 
 Conditional
@@ -436,26 +420,10 @@ A closure includes the an environment and the function contents.
 The environment will be used at execution time to lookup non-parameter variables that appear free in the function body.
 
 ```k
-    syntax ClosureVal ::= closure ( Map , Cases )
-                        | closure ( Map , Cases , Bindings , Vals ) [klabel(partialClosure), symbol]
- // ------------------------------------------------------------------------------------------------
-    rule <k> fun CASES => closure(RHO, CASES) ... </k>
+    syntax Exp ::= closure ( Map , Cases , Bindings , Vals ) [klabel(partialClosure), symbol]
+ // -----------------------------------------------------------------------------------------
+    rule <k> fun CASES => closure(RHO, CASES, .Bindings, .Vals) ... </k>
          <env> RHO </env>
-
-    syntax Bool ::= isEmptyClosureVal ( Val ) [function]
- // ----------------------------------------------------
-    rule isEmptyClosureVal(closure(_, _:EmptyCase | _))       => true
-    rule isEmptyClosureVal(closure(_, _:EmptyCase | _, _, _)) => true
-    rule isEmptyClosureVal(_)                                 => false [owise]
-
-    syntax Bool ::= fullyEvaluated ( Vals ) [function]
- // --------------------------------------------------
-    rule fullyEvaluated(.Vals)  => true
-    rule fullyEvaluated(V : VS) => fullyEvaluated(V) andBool fullyEvaluated(VS)
-
-    rule fullyEvaluated(V:Val)  => notBool isEmptyClosureVal(V)
-    rule fullyEvaluated([ VS ]) => fullyEvaluated(VS)
-    rule fullyEvaluated(_)      => false [owise]
 ```
 
 In evaluating an application, the arguments are evaluated in reverse order until we reach the applied function.
@@ -475,7 +443,6 @@ In evaluating an application, the arguments are evaluated in reverse order until
       [tag(applicationFocusArgument)]
 
     rule <k> V:Val ~> #apply(E) => E V ... </k>
-      requires fullyEvaluated(V)
 ```
 
 Finally, once all arguments are evaluated, we can attempt pattern matching on the closure's function contents.
@@ -484,16 +451,14 @@ As each argument is consumed, we match it against the closure's next pattern, in
 On failure, the process is restarted on the next `Case` in the closure function contents.
 
 ```k
-    rule <k> (closure(RHO, P C | CS) => closure(RHO, P C | CS, .Bindings, .Vals)) ~> #arg(_) ... </k>
-
-    rule <k> closure(RHO, -> E) => pushEnv ~> setEnv(RHO) ~> let .Bindings in E ~> popEnv ... </k>
-
     rule <k> (. => getMatchingBindings(P, V, BS)) ~> closure(RHO, (P C => C) | CS, BS => .Bindings, VS => V : VS) ~> (#arg(V) => .) ... </k>
 
-    rule <k> (matchResult(BS) => .) ~> closure(RHO,  P C | CS,           _  => BS, VS         )                             ... </k>
-    rule <k> (matchFailure    => .) ~> closure(RHO, (C:Case | CS => CS), BS,       VS => .Vals) ~> (. => #sequenceArgs(VS)) ... </k>
+    rule <k> (matchResult(BS) => .) ~> closure(RHO ,  _                  , _  => BS , VS          )                             ... </k>
+    rule <k> (matchFailure    => .) ~> closure(RHO , (C:Case | CS => CS) , BS       , VS => .Vals ) ~> (. => #sequenceArgs(VS)) ... </k>
 
-    rule <k> matchResult(BS) ~> closure(RHO, -> E | _, _, _) => pushEnv ~> setEnv(RHO) ~> let BS in E ~> popEnv ... </k>
+    rule <k> closure(RHO, -> E | _, BS, _) => pushEnv ~> setEnv(RHO) ~> let BS in E ~> popEnv ... </k>
+
+    rule <k> closure(_, _, _, _) #as CL => val(CL) ... </k> [owise]
 
     syntax K ::= #sequenceArgs ( Vals ) [function]
  // ----------------------------------------------
@@ -554,8 +519,8 @@ This machinery actually ensures that the recursive expressions know which values
     rule #applyMuVals(XS, .Vals)  => .Vals
     rule #applyMuVals(XS, V : VS) => #applyMuVal(XS, V) : #applyMuVals(XS, VS)
 
-    rule #applyMuVal(XS, V)                => V requires notBool isClosureVal(V)
-    rule #applyMuVal(XS, closure(RHO, CS)) => closure(RHO, #applyMuCases(XS, CS))
+    rule #applyMuVal(XS, val(closure(RHO, CS, BS, VS))) => val(closure(RHO, #applyMuCases(XS, CS), BS, VS))
+    rule #applyMuVal(XS, V)                             => V [owise]
 
     syntax Cases ::= #applyMuCases ( Names , Cases ) [function]
     syntax Case  ::= #applyMuCase  ( Names , Case  ) [function]
@@ -585,7 +550,7 @@ If the resulting closure invokes the stored `cc(RHO, K)`, the current state is r
 
     rule <k> cc(RHO, K) ~> #arg(V) ~> _ => setEnv(RHO) ~> V ~> K </k>
 
-    rule <k> closure(RHO, CS) cc(RHO', K) => closure(RHO, CS) ~> #arg(cc(RHO', K)) ... </k>
+    rule <k> closure(RHO, CS, BS, VS) cc(RHO', K) => closure(RHO, CS, BS, VS) ~> #arg(cc(RHO', K)) ... </k>
 ```
 
 Auxiliary operations
@@ -608,7 +573,6 @@ Environment recovery is used in multiple places where a sub-expression needs to 
 
     rule <k> V:Val ~> popEnv => setEnv(ENV) ~> V ... </k>
          <envs> ListItem(ENV) => .List ... </envs>
-      requires fullyEvaluated(V)
 ```
 
 ### Getters
