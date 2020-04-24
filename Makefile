@@ -154,16 +154,12 @@ test-imp: $(test_imp_files:=.run) $(prove_imp_files:=.prove)
 tests/%.imp.run: tests/%.imp.out
 	$(CHECK) $< tests/$*.imp.expected
 
-tests/%-spec.k.prove: tests/%-spec.k.out
-	$(CHECK) $< tests/$*-spec.k.expected
-
 .SECONDARY: $(test_imp_files:=.out)
 tests/%.imp.out: tests/%.imp $(imp_llvm_kompiled)
 	krun --directory $(imp_llvm_dir) $< > $@
 
-.SECONDARY: $(prove_imp_files:=.out)
-tests/%-spec.k.out: tests/%-spec.k $(imp_haskell_kompiled)
-	kprove --directory $(imp_haskell_dir) $< --def-module VERIFICATION > $@
+tests/%-spec.k.prove:
+	kprove --directory $(imp_haskell_dir) $< --def-module VERIFICATION
 
 ### FUN
 
@@ -175,13 +171,9 @@ test-fun: $(test_fun_files:=.run)
 tests/%.fun.run: tests/%.fun.out
 	$(CHECK) $< tests/$*.fun.expected
 
-tests/%-spec.k.prove: tests/%-spec.k.out
-	$(CHECK) $< tests/$*-spec.k.expected
-
 .SECONDARY: $(test_fun_files:=.out)
 tests/%.fun.out: tests/%.fun $(fun_llvm_kompiled)
 	krun --directory $(fun_llvm_dir) $< > $@
 
-.SECONDARY: $(prove_fun_files:=.out)
-tests/%-spec.k.out: tests/%-spec.k $(fun_haskell_kompiled)
-	kprove --directory $(fun_haskell_dir) $< --def-module VERIFICATION > $@
+tests/%-spec.k.prove:
+	kprove --directory $(fun_haskell_dir) $< --def-module VERIFICATION
