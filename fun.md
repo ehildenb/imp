@@ -532,14 +532,13 @@ The following helpers actually do the allocation and assignment operations on th
 
     rule <k> .Vals ~> #assign(.Names) => . ... </k>
 
-    rule <k> (#listTailMatch(V) : VS => VS) ~> #assign(X , XS => XS) ... </k>
+    rule <k> (valCons(#listTailMatch(V), VS) => VS) ~> #assign(X , XS => XS) ... </k>
          <env> ENV => ENV[X <- V] </env>
       [tag(listAssignment)]
 
-    rule <k> (V:Val : VS => VS) ~> #assign(X , XS => XS) ... </k>
+    rule <k> (valCons(V, VS) => VS) ~> #assign(X , XS => XS) ... </k>
          <env> ENV => ENV[X <- V] </env>
-      requires notBool #isListTailMatch(V)
-      [tag(assignment)]
+      [owise, tag(assignment)]
 ```
 
 This machinery actually ensures that the recursive expressions know which values they may access from the enclosing environment.
@@ -669,10 +668,5 @@ The following auxiliary operations extract the list of identifiers and of expres
 
     syntax Val ::= #listTailMatch ( Vals )
  // --------------------------------------
-
-    syntax Bool ::= #isListTailMatch ( Exp ) [function]
- // ---------------------------------------------------
-    rule #isListTailMatch(#listTailMatch(_)) => true
-    rule #isListTailMatch(_)                 => false [owise]
 endmodule
 ```
