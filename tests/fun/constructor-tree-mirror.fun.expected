@@ -1,1 +1,11 @@
-(Tree (Tree (Tree (Leaf 5) (Leaf 4)) (Leaf 3)) (Tree (Leaf 2) (Leaf 1)))
+<FUN>
+  <k>
+    Tree ( Tree ( Tree ( Leaf 5 ) ( Leaf 4 ) ) ( Leaf 3 ) ) ( Tree ( Leaf 2 ) ( Leaf 1 ) )
+  </k>
+  <env>
+    .Map
+  </env>
+  <envs>
+    .List
+  </envs>
+</FUN>
