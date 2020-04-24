@@ -110,9 +110,9 @@ A list is turned back into a regular element by wrapping it in the `[_]` operato
     syntax Exp ::= "[" Exps "]" [klabel(expList), symbol]
  // -----------------------------------------------------
 
-    syntax Exp ::= "[" "]" [function]
- // ---------------------------------
-    rule [ ] => valList(.Vals)
+    syntax Val ::= "[" "]"
+ // ----------------------
+    rule [ ] => valList(.Vals) [macro]
 ```
 
 ### Expressions
@@ -388,10 +388,8 @@ Expressions
 ```
 
 ```k
-    syntax KItem ::= "#expList"
- // ---------------------------
-    rule <k> expList(ES) => ES ~> #expList      ... </k>
-    rule <k> VS:Vals ~> #expList => valList(VS) ... </k>
+    rule <k> [ ES:Exps ] => ES ~> [ ] ... </k>
+    rule <k> VS:Vals ~> [ ] => [ VS ] ... </k>
 
     syntax KItem ::= "#consHead" Val | "#consTail" Exps
  // ---------------------------------------------------
@@ -451,6 +449,8 @@ As each argument is consumed, we match it against the closure's next pattern, in
 On failure, the process is restarted on the next `Case` in the closure function contents.
 
 ```k
+    rule <k> (val(closure(_, _, _, _) #as CL) => CL) ~> #arg(_) ... </k>
+
     rule <k> (. => getMatchingBindings(P, V, BS)) ~> closure(RHO, (P C => C) | CS, BS => .Bindings, VS => V : VS) ~> (#arg(V) => .) ... </k>
 
     rule <k> (matchResult(BS) => .) ~> closure(RHO ,  _                  , _  => BS , VS          )                             ... </k>
@@ -497,11 +497,11 @@ The following helpers actually do the allocation and assignment operations on th
 
     rule <k> .Vals ~> #assign(.Names) => . ... </k>
 
-    rule <k> (valCons(#listTailMatch(V), VS) => VS) ~> #assign(X , XS => XS) ... </k>
+    rule <k> (#listTailMatch(V) : VS:Vals => VS) ~> #assign(X , XS => XS) ... </k>
          <env> ENV => ENV[X <- V] </env>
       [tag(listAssignment)]
 
-    rule <k> (valCons(V, VS) => VS) ~> #assign(X , XS => XS) ... </k>
+    rule <k> (V:Val : VS:Vals => VS) ~> #assign(X , XS => XS) ... </k>
          <env> ENV => ENV[X <- V] </env>
       [owise, tag(assignment)]
 ```
@@ -550,7 +550,7 @@ If the resulting closure invokes the stored `cc(RHO, K)`, the current state is r
 
     rule <k> cc(RHO, K) ~> #arg(V) ~> _ => setEnv(RHO) ~> V ~> K </k>
 
-    rule <k> closure(RHO, CS, BS, VS) cc(RHO', K) => closure(RHO, CS, BS, VS) ~> #arg(cc(RHO', K)) ... </k>
+    rule <k> val(closure(RHO, CS, BS, VS)) cc(RHO', K) => val(closure(RHO, CS, BS, VS)) ~> #arg(cc(RHO', K)) ... </k>
 ```
 
 Auxiliary operations
