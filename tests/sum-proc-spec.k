@@ -14,7 +14,7 @@ module SUM-PROC-SPEC
          </mem>
       requires N >=Int 0
 
-    rule <k> sum ( N:Int , .Ints ) => ((N *Int (N +Int 1)) /Int 2) ... </k>
+    rule <k> sum ( (N:Int , .Ints):Ints ) => ((N *Int (N +Int 1)) /Int 2) ... </k>
          <procs>
            sum |-> def sum ( n , .Ids ) {
                      int s , .Ids ;
@@ -34,7 +34,7 @@ module SUM-PROC-SPEC
                         return 0;
                      } else {
                         i = n - 1;
-                        return n + sum(i, .Ids);
+                        return n + sum((i, .Ids):AExps);
                      }
                    }
          </procs>
