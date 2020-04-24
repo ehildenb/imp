@@ -595,10 +595,7 @@ The following auxiliary operations extract the list of identifiers and of expres
     rule <k> matchResult(BS) ~> getMatchings(ES, VS') => getMatchings(ES, VS') ~> matchResult(BS) ... </k>
     rule <k> matchResult(BS) ~> getMatching (E , V  ) => getMatching (E , V  ) ~> matchResult(BS) ... </k>
 
-    rule <k> getMatching ( B:Bool             , B':Bool            ) => matchResult(.Bindings) ... </k> requires B ==Bool   B'
-    rule <k> getMatching ( I:Int              , I':Int             ) => matchResult(.Bindings) ... </k> requires I ==Int    I'
-    rule <k> getMatching ( S:String           , S':String          ) => matchResult(.Bindings) ... </k> requires S ==String S'
-    rule <k> getMatching ( C:ConstructorName  , C':ConstructorName ) => matchResult(.Bindings) ... </k> requires C ==K      C'
+    rule <k> getMatching(V:Val, V':Val) => matchResult(.Bindings) ... </k> requires V ==K V'
 
     rule <k> getMatching(N:Name, V:Val) => matchResult(N = V) ... </k>
 
