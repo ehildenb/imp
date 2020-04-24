@@ -23,40 +23,7 @@ To make it more interesting and to highlight some of K's strengths, FUN includes
 -   Functions declared in `let`/`letrec` binders and declared anonymously can take multiple space-separated arguments.
     In addition, functions can be partially applied to arguments, allowing the function to be evaluated incrementally.
 
--   Functions can be defined using pattern matching over the available data-types.
-    For example, the program
-
-    ```
-    letrec max = fun [ h : .Exps ] -> h
-                 |   [ h : t     ] -> let x = max [ t ]
-                                       in if h > x then h else x
-    in max [ 1 : 3 : 5 : 2 : 4 : 0 : -1 : -5 : .Exps ]
-    ```
-
-    defines a function `max` that calculates the maximum element of a non-empty list, and the function
-
-    ```
-    datatype ('a,'b) pair = Pair 'a 'b
-
-    letrec ack = fun (Pair 0 n) -> n + 1
-                 |   (Pair m 0) -> ack (Pair (m - 1) 1)
-                 |   (Pair m n) -> ack (Pair (m - 1) (ack (Pair m (n - 1))))
-    in ack (Pair 2 3)
-    ```
-
-    calculates the Ackermann function applied to a particular pair of numbers.
-    Patterns can currently only be used when declaring arguments to a function, not directly in `let`/`letrec` binders.
-    For example, this is not allowed:
-
-    ```
-    letrec (Pair x y) = (Pair 1 2) in x + y
-    ```
-
-    But this is allowed:
-
-    ```
-    let f (Pair x y) = x + y in f (Pair 1 2)
-    ```
+-   Functions can be defined using pattern matching over the available declared data-types.
 
 -   We include a `callcc` construct ("call with current continuation") to demonstrate the modularity of K semantic definitions.
     This allows for using `try`/`catch` control flow constructs.
@@ -65,7 +32,7 @@ Syntax
 ======
 
 ```k
-module FUN-UNTYPED-COMMON
+module FUN-COMMON
     imports MAP
     imports INT
     imports FLOAT
@@ -338,13 +305,13 @@ These inform the parser of precedence information when ambiguous parses show up.
 
 ```k
     syntax priorities casePattern
-                    > ___FUN-UNTYPED-COMMON
+                    > ___FUN-COMMON
                     > arith
-                    > let_in__FUN-UNTYPED-COMMON
-                      letrec_in__FUN-UNTYPED-COMMON
-                      if_then_else__FUN-UNTYPED-COMMON
-                    > fun__FUN-UNTYPED-COMMON
-                    > datatype_=___FUN-UNTYPED-COMMON
+                    > let_in__FUN-COMMON
+                      letrec_in__FUN-COMMON
+                      if_then_else__FUN-COMMON
+                    > fun__FUN-COMMON
+                    > datatype_=___FUN-COMMON
 endmodule
 ```
 
@@ -354,8 +321,8 @@ FUN Identifier Instantiation
 The following module instantiates the empty identifier sorts declared above with their corresponding regular expressions.
 
 ```k
-module FUN-UNTYPED-SYNTAX
-    imports FUN-UNTYPED-COMMON
+module FUN-SYNTAX
+    imports FUN-COMMON
     imports BUILTIN-ID-TOKENS
 
     syntax Name            ::= r"[a-z][_a-zA-Z0-9]*"      [autoReject, token, prec(2)]
@@ -372,8 +339,8 @@ Semantics
 The semantics below is environment-based.
 
 ```k
-module FUN-UNTYPED
-    imports FUN-UNTYPED-COMMON
+module FUN
+    imports FUN-COMMON
     imports LIST
 ```
 
