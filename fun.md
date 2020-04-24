@@ -407,9 +407,9 @@ Lists must be handled carefully, because not every `ClosureVal` should be consid
 
     syntax KItem ::= "#consHead" Val | "#consTail" Exps
  // ---------------------------------------------------
-    rule <k> expCons(E, ES) => E ~> #consTail ES ... </k>
-    rule <k> valCons(V, VS) => V ~> #consTail VS ... </k>
-      requires notBool fullyEvaluated(V : VS)
+    rule <k> expCons(E:Exp, ES) => E ~> #consTail ES ... </k>
+    rule <k> valCons(V,     VS) => V ~> #consTail VS ... </k> requires notBool fullyEvaluated(V)
+    rule <k> valCons(V,     VS) => VS ~> #consHead V ... </k> requires notBool fullyEvaluated(VS)
 
     rule <k> V:Val ~> #consTail ES => ES ~> #consHead V ... </k>
       requires fullyEvaluated(V)
