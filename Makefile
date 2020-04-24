@@ -144,21 +144,21 @@ CHECK := git --no-pager diff --no-index --ignore-all-space -R
 
 test: test-imp test-fun
 
+tests/%.run: tests/%.out
+	$(CHECK) $< tests/$*.expected
+
 ### IMP
 
-test_imp_files  := $(wildcard tests/*.imp)
-prove_imp_files := $(wildcard tests/*-spec.k)
+test_imp_files  := $(wildcard tests/imp/*.imp)
+prove_imp_files := $(wildcard tests/imp/*-spec.k)
 
 test-imp: $(test_imp_files:=.run) $(prove_imp_files:=.prove)
 
-tests/%.imp.run: tests/%.imp.out
-	$(CHECK) $< tests/$*.imp.expected
-
 .SECONDARY: $(test_imp_files:=.out)
-tests/%.imp.out: tests/%.imp $(imp_llvm_kompiled)
+tests/imp/%.imp.out: tests/imp/%.imp $(imp_llvm_kompiled)
 	krun --directory $(imp_llvm_dir) $< > $@
 
-tests/%-spec.k.prove:
+tests/imp/%-spec.k.prove:
 	kprove --directory $(imp_haskell_dir) $< --def-module VERIFICATION
 
 ### FUN
@@ -168,12 +168,9 @@ prove_fun_files := $(wildcard tests/*-spec.k)
 
 test-fun: $(test_fun_files:=.run)
 
-tests/%.fun.run: tests/%.fun.out
-	$(CHECK) $< tests/$*.fun.expected
-
 .SECONDARY: $(test_fun_files:=.out)
-tests/%.fun.out: tests/%.fun $(fun_llvm_kompiled)
+tests/fun/%.fun.out: tests/fun/%.fun $(fun_llvm_kompiled)
 	krun --directory $(fun_llvm_dir) $< > $@
 
-tests/%-spec.k.prove:
+tests/fun/%-spec.k.prove:
 	kprove --directory $(fun_haskell_dir) $< --def-module VERIFICATION
