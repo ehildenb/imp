@@ -260,8 +260,8 @@ Like in many functional languages, type parameters/variables in user-defined typ
 
 ```k
     syntax TypeVar
-    syntax TypeVars ::= List{TypeVar,","}
- // -------------------------------------
+    syntax TypeVars ::= List{TypeVar,","} [prefer]
+ // ----------------------------------------------
 ```
 
 Types can be basic types, function types, or user-defined parametric types.
