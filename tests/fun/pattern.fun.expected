@@ -1,1 +1,11 @@
-[ Pair 10 9 : Pair 0 1 : Pair 0 0 : [ ] ]
+<FUN>
+  <k>
+    [ Pair 10 9 : Pair 0 1 : Pair 0 0 : .Vals ]
+  </k>
+  <env>
+    .Map
+  </env>
+  <envs>
+    .List
+  </envs>
+</FUN>
