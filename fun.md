@@ -76,13 +76,13 @@ Lists of expressions are declared strict, so all expressions in the list get eva
     syntax ConstructorName
     syntax ClosureVal
     syntax ConstructorVal ::= ConstructorName
-                            | ConstructorVal Val [left]
- // ---------------------------------------------------
+                            | ConstructorVal Val [left, klabel(applyConstructor), symbol]
+ // -------------------------------------------------------------------------------------
 
     syntax ApplicableVal ::= ConstructorVal
                            | ClosureVal
-                           | ApplicableVal Val [left]
- // -------------------------------------------------
+                           | ApplicableVal Val [left, klabel(applyApplicable), symbol]
+ // ----------------------------------------------------------------------------------
 
     syntax Val ::= Int | Bool | String
                  | ApplicableVal
@@ -94,8 +94,8 @@ Lists of expressions are declared strict, so all expressions in the list get eva
 ```
 
 ```k
-    syntax Exp ::= Exp Exp [left]
- // -----------------------------
+    syntax Exp ::= Exp Exp [left, klabel(applyExp), symbol]
+ // -------------------------------------------------------
 
     syntax Bool ::= isApplication ( Exp ) [function]
  // ------------------------------------------------
@@ -110,13 +110,13 @@ A list is turned back into a regular element by wrapping it in the `[_]` operato
 
 ```k
     syntax Exps ::= Vals
-    syntax Vals ::= Val | ".Vals" [klabel(.Vals)] | Val ":" Vals
-    syntax Exps ::= Exp | ".Exps" [klabel(.Vals)] | Exp ":" Exps
- // ------------------------------------------------------------
+    syntax Vals ::= Val | ".Vals" [klabel(.Vals), symbol] | Val ":" Vals
+    syntax Exps ::= Exp | ".Exps" [klabel(.Vals), symbol] | Exp ":" Exps
+ // --------------------------------------------------------------------
 
-    syntax Val ::= "[" Vals "]" [klabel(valList)]
-    syntax Exp ::= "[" Exps "]" [klabel(expList)]
- // ---------------------------------------------
+    syntax Val ::= "[" Vals "]" [klabel(valList), symbol]
+    syntax Exp ::= "[" Exps "]" [klabel(expList), symbol]
+ // -----------------------------------------------------
 
     syntax Exp ::= "[" "]" [function]
  // ---------------------------------
@@ -158,8 +158,8 @@ We also tag all these rules with a new tag, "arith", so we can more easily defin
 The conditional construct has the expected evaluation strategy, stating that only the first argument always evaluated:
 
 ```k
-    syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)]
- // ----------------------------------------------------------
+    syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1), klabel(ite), symbol]
+ // -------------------------------------------------------------------------------
 ```
 
 ### Algebraic Data Types
@@ -170,8 +170,8 @@ These will be useful when we define the type system later on.
 **NOTE**: In a future version of K, we want the datatype declaration to be a construct by itself, but that is not possible currently because K's parser wronly identifies the BLAH operation allowing a declaration to appear in front of an expression with the function application construct, giving ambiguous parsing errors.
 
 ```k
-    syntax Exp ::= "datatype" Type "=" TypeCases Exp
- // ------------------------------------------------
+    syntax Exp ::= "datatype" Type "=" TypeCases Exp [klabel(data), symbol]
+ // -----------------------------------------------------------------------
     rule datatype T = TCS E => E [macro]
 ```
 
@@ -192,12 +192,12 @@ Function application is just concatenation of expressions, without worrying abou
 Again, the type system will reject type-incorrect programs.
 
 ```k
-    syntax Exp ::= "fun" Cases
- // --------------------------
+    syntax Exp ::= "fun" Cases [klabel(fun), symbol]
+ // ------------------------------------------------
 
     syntax Case ::= "->" Exp
-                  | Exp Case [klabel(casePattern)]
- // ----------------------------------------------
+                  | Exp Case [klabel(casePattern), symbol]
+ // ------------------------------------------------------
 
     syntax Cases ::= List{Case, "|"}
  // --------------------------------
@@ -211,9 +211,9 @@ We allow multiple (potentially recursive) and-separated bindings.
 **TODO**: The "prefer" attribute for letrec currently needed due to tool bug, to make sure that "letrec" is not parsed as "let rec".
 
 ```k
-    syntax Exp ::= "let"    Bindings "in" Exp
-                 | "letrec" Bindings "in" Exp [prefer]
- // --------------------------------------------------
+    syntax Exp ::= "let"    Bindings "in" Exp [klabel(let), symbol]
+                 | "letrec" Bindings "in" Exp [prefer, klabel(letrec), symbol]
+ // --------------------------------------------------------------------------
 ```
 
 Bindings themselves comprise of expressions `E = E'`, where variables in `E` are bound by matching before evaluating `E'`.
@@ -294,8 +294,8 @@ To avoid syntactic ambiguities with the arrow construct for function cases, we u
 
     syntax TypeCase  ::= ConstructorName
                        | TypeCase Type
-    syntax TypeCases ::= List{TypeCase,"|"}            [klabel(_|TypeCase_)]
- // ------------------------------------------------------------------------
+    syntax TypeCases ::= List{TypeCase,"|"} [klabel(_|TypeCase_)]
+ // -------------------------------------------------------------
 ```
 
 Additional Priorities
@@ -305,13 +305,11 @@ These inform the parser of precedence information when ambiguous parses show up.
 
 ```k
     syntax priorities casePattern
-                    > ___FUN-COMMON
+                    > applyConstructor applyApplicable applyExp
                     > arith
-                    > let_in__FUN-COMMON
-                      letrec_in__FUN-COMMON
-                      if_then_else__FUN-COMMON
-                    > fun__FUN-COMMON
-                    > datatype_=___FUN-COMMON
+                    > let letrec ite
+                    > fun
+                    > data
 endmodule
 ```
 
@@ -437,8 +435,8 @@ The environment will be used at execution time to lookup non-parameter variables
 
 ```k
     syntax ClosureVal ::= closure ( Map , Cases )
-                        | closure ( Map , Cases , Bindings , Vals ) [klabel(partialClosure)]
- // ----------------------------------------------------------------------------------------
+                        | closure ( Map , Cases , Bindings , Vals ) [klabel(partialClosure), symbol]
+ // ------------------------------------------------------------------------------------------------
     rule <k> fun CASES => closure(RHO, CASES) ... </k>
          <env> RHO </env>
 
