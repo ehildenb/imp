@@ -112,7 +112,7 @@ A list is turned back into a regular element by wrapping it in the `[_]` operato
 
     syntax Val ::= "[" "]"
  // ----------------------
-    rule [ ] => valList(.Vals) [macro]
+    rule [ ] => [ .Vals ] [macro]
 ```
 
 ### Expressions
@@ -393,11 +393,9 @@ Expressions
 
     syntax KItem ::= "#consHead" Val | "#consTail" Exps
  // ---------------------------------------------------
-    rule <k> expCons(E:Exp, ES) => E ~> #consTail ES ... </k>
-
-    rule <k> V:Val ~> #consTail ES => ES ~> #consHead V ... </k>
-
-    rule <k> VS:Vals ~> #consHead V => V : VS ... </k>
+    rule <k> E:Exp : ES             => E ~> #consTail ES ... </k>
+    rule <k> V:Val ~> #consTail ES  => ES ~> #consHead V ... </k>
+    rule <k> VS:Vals ~> #consHead V => V : VS            ... </k>
 ```
 
 Conditional
@@ -620,8 +618,8 @@ The following auxiliary operations extract the list of identifiers and of expres
     rule <k> getMatching(E:Exp E':Exp , CN:ConstructorName      ) => matchFailure                              ... </k>                                                      [tag(caseConstructorArgsFailure1)]
     rule <k> getMatching(E:Exp        , CV:ConstructorVal V':Val) => matchFailure                              ... </k> requires notBool (isName(E) orBool isApplication(E)) [tag(caseConstructorArgsFailure2)]
 
-    rule <k> getMatching(expList(ES), valList(VS)) => getMatchings(ES, VS) ... </k> [tag(caseListSuccess1)]
-    rule <k> getMatching(valList(ES), valList(VS)) => getMatchings(ES, VS) ... </k> [tag(caseListSuccess2)]
+    rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k> [tag(caseListSuccess1)]
+    rule <k> getMatching([ ES ], [ VS ]) => getMatchings(ES, VS) ... </k> [tag(caseListSuccess2)]
 
     rule <k> getMatchings(E:Exp,             .Vals            ) => matchFailure                              ... </k> requires notBool isName(E) [tag(caseListEmptyFailure1)]
     rule <k> getMatchings((_:Exp : _:Exps ), .Vals            ) => matchFailure                              ... </k>                            [tag(caseListEmptyFailure2)]
