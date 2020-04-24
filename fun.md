@@ -11,7 +11,7 @@ To make it more interesting and to highlight some of K's strengths, FUN includes
 -   The basic builtin data-types of integers, booleans and strings.
 
 -   Builtin lists, which can hold any elements, including other lists.
-    Lists are enclosed in square brackets and their elements are colon-separated; e.g., `[ 1 : 2 : 3 : .Exps ]`.
+    Lists are enclosed in square brackets and their elements are colon-separated; e.g., `[ 1 : 2 : 3 : .Vals ]`.
 
 -   User-defined data-types, by means of constructor terms.
     Constructor names start with a capital letter (while any other identifier in the language starts with a lowercase letter), and they can be followed by an arbitrary number of space separated arguments.
@@ -55,7 +55,6 @@ We start with the syntactic definition of FUN names.
 We have several categories of names: ones to be used for functions and variables, others to be used for data constructors, others for types and others for type variables.
 We will introduce them as needed, starting with the former category.
 We prefer the names of variables and functions to start with lower case letters.
-Two special names `$x` and `$k` are used in the semantics for desugaring builtin functions to actual functions (they will not parse in real programs).
 
 ```k
     syntax Name  ::= "$x" | "$k"
@@ -109,12 +108,11 @@ FUN's builtin lists are `_:_` separated cons-lists like many functional language
 A list is turned back into a regular element by wrapping it in the `[_]` operator.
 
 ```k
-    syntax Exps ::= Vals
-    syntax Vals ::= Val | ".Vals" | Val ":" Vals [prefer]
-    syntax Exps ::= Exp | ".Exps" | Exp ":" Exps
- // --------------------------------------------
+    syntax Vals ::= ".Vals" | Val | Val ":" Vals [klabel(valCons), symbol, prefer]
+    syntax Exps ::= Vals    | Exp | Exp ":" Exps [klabel(expCons), symbol]
+ // ----------------------------------------------------------------------
 
-    syntax Val ::= "[" Vals "]" [klabel(valList), symbol]
+    syntax Val ::= "[" Vals "]" [klabel(valList), symbol, prefer]
     syntax Exp ::= "[" Exps "]" [klabel(expList), symbol]
  // -----------------------------------------------------
 
@@ -235,7 +233,7 @@ Bindings themselves comprise of expressions `E = E'`, where variables in `E` are
     syntax Exp  ::= #exp  ( Binding  ) [function]
     syntax Exps ::= #exps ( Bindings ) [function]
  // ---------------------------------------------
-    rule #exps(.Bindings)        => .Exps
+    rule #exps(.Bindings)        => .Vals
     rule #exps(B:Binding and BS) => #exp(B) : #exps(BS)
 
     rule #exp(_:Name = E) => E
@@ -402,18 +400,19 @@ Lists must be handled carefully, because not every `ClosureVal` should be consid
  // ---------------------------
     rule <k> expList(ES)         => ES ~> #expList ... </k>
     rule <k> VS:Vals ~> #expList => valList(VS)    ... </k>
-      requires areFullyEvaluated(VS)
+      requires fullyEvaluated(VS)
 
     syntax KItem ::= "#consHead" Val | "#consTail" Exps
  // ---------------------------------------------------
-    rule <k> E : ES => E ~> #consTail ES ... </k>
-      requires notBool areFullyEvaluated(E : ES)
+    rule <k> expCons(E, ES) => E ~> #consTail ES ... </k>
+    rule <k> valCons(V, VS) => V ~> #consTail VS ... </k>
+      requires notBool fullyEvaluated(V : VS)
 
     rule <k> V:Val ~> #consTail ES => ES ~> #consHead V ... </k>
-      requires isFullyEvaluated(V)
+      requires fullyEvaluated(V)
 
     rule <k> VS:Vals ~> #consHead V => V : VS ... </k>
-      requires areFullyEvaluated(VS)
+      requires fullyEvaluated(VS)
 ```
 
 Conditional
@@ -450,18 +449,14 @@ The environment will be used at execution time to lookup non-parameter variables
     rule isEmptyClosureVal(closure(_, -> E | _, _, _)) => true
     rule isEmptyClosureVal(closure(_, _ _  | _, _, _)) => false
 
-    syntax Bool ::=  isFullyEvaluated ( Exp  ) [function]
-                  | areFullyEvaluated ( Exps ) [function]
- // -----------------------------------------------------
-    rule isFullyEvaluated(E    )       => false                        requires notBool isVal(E)
-    rule isFullyEvaluated(V:Val)       => notBool isEmptyClosureVal(V)
-    rule isFullyEvaluated(valList(VS)) => areFullyEvaluated(VS)
-    rule isFullyEvaluated(expList(VS)) => false
+    syntax Bool ::= fullyEvaluated ( Vals ) [function]
+ // --------------------------------------------------
+    rule fullyEvaluated(.Vals)  => true
+    rule fullyEvaluated(V : VS) => fullyEvaluated(V) andBool fullyEvaluated(VS)
 
-    rule areFullyEvaluated(.Vals)  => true
-    rule areFullyEvaluated(.Exps)  => true
-    rule areFullyEvaluated(N:Name) => false
-    rule areFullyEvaluated(E : ES) => isFullyEvaluated(E) andBool areFullyEvaluated(ES)
+    rule fullyEvaluated(V:Val)  => notBool isEmptyClosureVal(V)
+    rule fullyEvaluated([ VS ]) => fullyEvaluated(VS)
+    rule fullyEvaluated(_)      => false [owise]
 ```
 
 In evaluating an application, the arguments are evaluated in reverse order until we reach the applied function.
@@ -481,7 +476,7 @@ In evaluating an application, the arguments are evaluated in reverse order until
       [tag(applicationFocusArgument)]
 
     rule <k> V:Val ~> #apply(E) => E V ... </k>
-      requires isFullyEvaluated(V)
+      requires fullyEvaluated(V)
 ```
 
 Finally, once all arguments are evaluated, we can attempt pattern matching on the closure's function contents.
@@ -615,7 +610,7 @@ Environment recovery is used in multiple places where a sub-expression needs to 
 
     rule <k> V:Val ~> popEnv => setEnv(ENV) ~> V ... </k>
          <envs> ListItem(ENV) => .List ... </envs>
-      requires isFullyEvaluated(V)
+      requires fullyEvaluated(V)
 ```
 
 ### Getters
@@ -668,8 +663,8 @@ The following auxiliary operations extract the list of identifiers and of expres
 
     rule <k> getMatchings(E:Exp,             .Vals            ) => matchFailure                              ... </k> requires notBool isName(E) [tag(caseListEmptyFailure1)]
     rule <k> getMatchings((_:Exp : _:Exps ), .Vals            ) => matchFailure                              ... </k>                            [tag(caseListEmptyFailure2)]
-    rule <k> getMatchings(.Exps,             (_:Val : _:Vals) ) => matchFailure                              ... </k>                            [tag(caseListEmptyFailure3)]
-    rule <k> getMatchings(.Exps,             .Vals            ) => matchResult(.Bindings)                    ... </k>                            [tag(caseListEmptySuccess)]
+    rule <k> getMatchings(.Vals,             (_:Val : _:Vals) ) => matchFailure                              ... </k>                            [tag(caseListEmptyFailure3)]
+    rule <k> getMatchings(.Vals,             .Vals            ) => matchResult(.Bindings)                    ... </k>                            [tag(caseListEmptySuccess)]
     rule <k> getMatchings(X:Name,            VS:Vals          ) => matchResult(X = #listTailMatch(VS))       ... </k>                            [tag(caseListSingletonSuccess)]
     rule <k> getMatchings((E:Exp : ES:Exps), (V:Val : VS:Vals)) => getMatching(E, V) ~> getMatchings(ES, VS) ... </k>                            [tag(caseListNonemptySuccess)]
 
