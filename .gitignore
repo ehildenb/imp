@@ -3,4 +3,4 @@
 /imp-hs/imp-hs.cabal
 /imp-hs/.stack-work
 /imp-hs/stack.yaml.lock
-/tests/*.out
+/tests/*/*.out
