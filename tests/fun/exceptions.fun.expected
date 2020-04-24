@@ -1,0 +1,37 @@
+<FUN>
+  <k>
+    21
+  </k>
+  <env>
+    .Map
+  </env>
+  <envs>
+    ListItem ( $k |-> cc ( .Map , . ) )
+    ListItem ( $k |-> cc ( $k |-> cc ( .Map , . )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) , popEnv ~> popEnv ~> popEnv ~> popEnv )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) )
+    x |-> 10 )
+    ListItem ( $k |-> cc ( $k |-> cc ( .Map , . )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) , popEnv ~> popEnv ~> popEnv ~> popEnv )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) )
+    ListItem ( $k |-> cc ( $k |-> cc ( .Map , . )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) , popEnv ~> popEnv ~> popEnv ~> popEnv )
+    throw |-> val ( closure ( $k |-> cc ( $k |-> cc ( .Map , . )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) , popEnv ~> popEnv ~> popEnv ~> popEnv )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) , x -> $k ( throw ( 2 * x ) + 7 ) | .Cases , .Bindings , .Vals ) ) )
+    ListItem ( $k |-> cc ( $k |-> cc ( .Map , . )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) , popEnv ~> popEnv ~> popEnv ~> popEnv )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) )
+    ListItem ( $k |-> cc ( $k |-> cc ( .Map , . )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) , popEnv ~> popEnv ~> popEnv ~> popEnv )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) )
+    ListItem ( $k |-> cc ( .Map , . )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) )
+    ListItem ( $k |-> cc ( .Map , . )
+    throw |-> val ( closure ( $k |-> cc ( .Map , . ) , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) ) )
+    ListItem ( $k |-> cc ( .Map , . ) )
+    ListItem ( $k |-> cc ( .Map , . ) )
+    ListItem ( .Map )
+    ListItem ( .Map )
+  </envs>
+</FUN>

@@ -1,0 +1,24 @@
+<FUN>
+  <k>
+    17
+  </k>
+  <env>
+    $k |-> cc ( y |-> 3 , popEnv )
+    throw |-> val ( closure ( $k |-> cc ( y |-> 3 , popEnv )
+    y |-> 3 , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) )
+    y |-> 3
+  </env>
+  <envs>
+    ListItem ( $k |-> cc ( y |-> 3 , popEnv )
+    throw |-> val ( closure ( $k |-> cc ( y |-> 3 , popEnv )
+    y |-> 3 , x -> $k ( x + 1 ) | .Cases , .Bindings , .Vals ) )
+    y |-> 3 )
+    ListItem ( $k |-> cc ( y |-> 3 , popEnv )
+    y |-> 3 )
+    ListItem ( $k |-> cc ( y |-> 3 , popEnv )
+    y |-> 3 )
+    ListItem ( y |-> 3 )
+    ListItem ( y |-> 3 )
+    ListItem ( .Map )
+  </envs>
+</FUN>

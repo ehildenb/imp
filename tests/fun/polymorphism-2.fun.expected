@@ -1,0 +1,11 @@
+<FUN>
+  <k>
+    val ( closure ( .Map , x -> let ( y = x ) and .Bindings in y | .Cases , .Bindings , .Vals ) )
+  </k>
+  <env>
+    .Map
+  </env>
+  <envs>
+    .List
+  </envs>
+</FUN>

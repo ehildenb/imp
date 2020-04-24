@@ -1,0 +1,12 @@
+<FUN>
+  <k>
+    Tree Tree Leaf 3 Leaf ~> #arg ( 6 ) ~> #arg ( Tree Leaf 21 Leaf ) ~> #apply ( Tree ) ~> #arg ( 1 ) ~> #arg ( Tree Leaf 11 Leaf ) ~> #apply ( foldtree f 0 ) ~> popEnv
+  </k>
+  <env>
+    f |-> val ( closure ( .Map , x y z -> mu ( foldtree , f , .Names , x + y + z ) | .Cases , .Bindings , .Vals ) )
+    foldtree |-> val ( closure ( .Map , f b -> mu ( foldtree , f , .Names , fun Leaf -> b | ( Tree left n right ) -> f n ( foldtree f b left ) ( foldtree f b right ) | .Cases ) | .Cases , .Bindings , .Vals ) )
+  </env>
+  <envs>
+    ListItem ( .Map )
+  </envs>
+</FUN>
