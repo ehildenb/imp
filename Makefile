@@ -65,10 +65,6 @@ KOMPILE_OPTS += -ccopt -std=c++14 -O2
 
 ### IMP
 
-build-imp: build-imp-llvm build-imp-haskell
-build-imp-llvm:    $(imp_llvm_kompiled)
-build-imp-haskell: $(imp_haskell_kompiled)
-
 imp_module := IMP
 imp_dir    := $(DEFN_DIR)/imp
 
@@ -79,6 +75,10 @@ imp_llvm_kompiled := $(imp_llvm_dir)/imp-kompiled/interpreter
 imp_haskell_dir      := $(imp_dir)/haskell
 imp_haskell_files    := $(imp_haskell_dir)/imp.k
 imp_haskell_kompiled := $(imp_haskell_dir)/imp-kompiled/definition.kore
+
+build-imp: build-imp-llvm build-imp-haskell
+build-imp-llvm:    $(imp_llvm_kompiled)
+build-imp-haskell: $(imp_haskell_kompiled)
 
 $(imp_llvm_dir)/%.k: %.md $(TANGLER)
 	@mkdir -p $(imp_llvm_dir)
@@ -102,10 +102,6 @@ $(imp_haskell_kompiled): $(imp_haskell_files)
 
 ### FUN
 
-build-fun: build-fun-llvm build-fun-haskell
-build-fun-llvm:    $(fun_llvm_kompiled)
-build-fun-haskell: $(fun_haskell_kompiled)
-
 fun_module := FUN
 fun_dir    := $(DEFN_DIR)/fun
 
@@ -116,6 +112,10 @@ fun_llvm_kompiled := $(fun_llvm_dir)/fun-kompiled/interpreter
 fun_haskell_dir      := $(fun_dir)/haskell
 fun_haskell_files    := $(fun_haskell_dir)/fun.k
 fun_haskell_kompiled := $(fun_haskell_dir)/fun-kompiled/definition.kore
+
+build-fun: build-fun-llvm build-fun-haskell
+build-fun-llvm:    $(fun_llvm_kompiled)
+build-fun-haskell: $(fun_haskell_kompiled)
 
 $(fun_llvm_dir)/%.k: %.md $(TANGLER)
 	@mkdir -p $(fun_llvm_dir)
