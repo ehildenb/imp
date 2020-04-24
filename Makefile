@@ -158,7 +158,7 @@ test-imp: $(test_imp_files:=.run) $(prove_imp_files:=.prove)
 tests/imp/%.imp.out: tests/imp/%.imp $(imp_llvm_kompiled)
 	krun --directory $(imp_llvm_dir) $< > $@
 
-tests/imp/%-spec.k.prove:
+tests/imp/%-spec.k.prove: tests/imp/%-spec.k
 	kprove --directory $(imp_haskell_dir) $< --def-module VERIFICATION
 
 ### FUN
@@ -172,5 +172,5 @@ test-fun: $(test_fun_files:=.run)
 tests/fun/%.fun.out: tests/fun/%.fun $(fun_llvm_kompiled)
 	krun --directory $(fun_llvm_dir) $< > $@
 
-tests/fun/%-spec.k.prove:
+tests/fun/%-spec.k.prove: tests/fun/%-spec.k
 	kprove --directory $(fun_haskell_dir) $< --def-module VERIFICATION
