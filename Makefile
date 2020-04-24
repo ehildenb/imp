@@ -146,12 +146,12 @@ test: test-imp test-fun
 
 ### IMP
 
-test-imp: $(test_imp_files:=.run-k)
-
 test_imp_files  := $(wildcard tests/*.imp)
 prove_imp_files := $(wildcard tests/*-spec.k)
 
-tests/%.imp.run-k: tests/%.imp.k-out
+test-imp: $(test_imp_files:=.run) $(prove_imp_files:=.prove)
+
+tests/%.imp.run: tests/%.imp.k-out
 	$(CHECK) $< tests/$*.imp.k-expected
 
 tests/%-spec.k.prove: tests/%-spec.k.out
@@ -166,12 +166,12 @@ tests/%-spec.k.out: tests/%-spec.k $(imp_haskell_kompiled)
 
 ### FUN
 
-test-fun: $(test_fun_files:=.run-k)
-
 test_fun_files  := $(wildcard tests/*.fun)
 prove_fun_files := $(wildcard tests/*-spec.k)
 
-tests/%.fun.run-k: tests/%.fun.k-out
+test-fun: $(test_fun_files:=.run)
+
+tests/%.fun.run: tests/%.fun.k-out
 	$(CHECK) $< tests/$*.fun.k-expected
 
 tests/%-spec.k.prove: tests/%-spec.k.out
