@@ -154,7 +154,6 @@ prove_imp_files := $(wildcard tests/imp/*-spec.k)
 
 test-imp: $(test_imp_files:=.run) $(prove_imp_files:=.prove)
 
-.SECONDARY: $(test_imp_files:=.out)
 tests/imp/%.imp.out: tests/imp/%.imp $(imp_llvm_kompiled)
 	krun --directory $(imp_llvm_dir) $< > $@
 
@@ -168,7 +167,6 @@ prove_fun_files := $(wildcard tests/*-spec.k)
 
 test-fun: $(test_fun_files:=.run)
 
-.SECONDARY: $(test_fun_files:=.out)
 tests/fun/%.fun.out: tests/fun/%.fun $(fun_llvm_kompiled)
 	krun --directory $(fun_llvm_dir) $< > $@
 
