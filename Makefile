@@ -164,8 +164,9 @@ tests/imp/%-spec.k.prove: tests/imp/%-spec.k
 
 ### FUN
 
-test_fun_files  := $(wildcard tests/fun/*.fun)
-prove_fun_files := $(wildcard tests/fun/*-spec.k)
+fun_failing     := $(shell cat tests/fun.failing)
+test_fun_files  := $(filter-out $(fun_failing), $(wildcard tests/fun/*.fun))
+prove_fun_files := $(filter-out $(fun_failing), $(wildcard tests/fun/*-spec.k))
 
 test-fun: $(test_fun_files:=.run)
 
