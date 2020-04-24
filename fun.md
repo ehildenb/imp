@@ -605,7 +605,8 @@ The following auxiliary operations extract the list of identifiers and of expres
 
     rule <k> getMatching(_, _) => matchFailure ... </k> [owise]
 
-    rule <k> getMatchings(.Vals,             .Vals            ) => matchResult(.Bindings)                    ... </k>
+    rule <k> getMatchings(VS:Vals, VS':Vals) => matchResult(.Bindings) ... </k> requires VS ==K VS'
+
     rule <k> getMatchings(X:Name,            VS:Vals          ) => matchResult(X = #listTailMatch(VS))       ... </k>
     rule <k> getMatchings((E:Exp : ES:Exps), (V:Val : VS:Vals)) => getMatching(E, V) ~> getMatchings(ES, VS) ... </k>
 
