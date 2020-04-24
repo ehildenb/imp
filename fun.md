@@ -76,8 +76,8 @@ Lists of expressions are declared strict, so all expressions in the list get eva
     syntax ConstructorName
     syntax ClosureVal
     syntax ConstructorVal ::= ConstructorName
-                            | ConstructorVal Val [left, klabel(applyConstructor), symbol]
- // -------------------------------------------------------------------------------------
+                            | ConstructorVal Val [left, klabel(applyConstructor), symbol, prefer]
+ // ---------------------------------------------------------------------------------------------
 
     syntax ApplicableVal ::= ConstructorVal
                            | ClosureVal
@@ -94,8 +94,8 @@ Lists of expressions are declared strict, so all expressions in the list get eva
 ```
 
 ```k
-    syntax Exp ::= Exp Exp [left, klabel(applyExp), symbol]
- // -------------------------------------------------------
+    syntax Exp ::= Exp Exp [left, klabel(applyExp), symbol, avoid]
+ // --------------------------------------------------------------
 
     syntax Bool ::= isApplication ( Exp ) [function]
  // ------------------------------------------------
