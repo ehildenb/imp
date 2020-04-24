@@ -26,13 +26,12 @@ LUA_PATH                := $(PANDOC_TANGLE_SUBMODULE)/?.lua;;
 export TANGLER
 export LUA_PATH
 
-.PHONY: clean distclean         \
-        deps deps-k deps-tangle \
-        defn defn-imp-k         \
-        build build-imp-k       \
-        test test-imp-k
+.PHONY: clean distclean           \
+        deps deps-k deps-tangle   \
+        build build-imp build-fun \
+        test test-imp test-fun
 
-all: build split-tests
+all: build
 
 clean:
 	rm -rf $(DEFN_BASE_DIR)
@@ -63,49 +62,80 @@ $(TANGLER):
 # Building
 # --------
 
-imp_k_module := IMP
-imp_k_dir    := $(DEFN_DIR)/k/imp-k
-
-imp_k_llvm_dir      := $(imp_k_dir)/llvm
-imp_k_llvm_files    := $(imp_k_llvm_dir)/imp-k.k
-imp_k_llvm_kompiled := $(imp_k_llvm_dir)/imp-k-kompiled/interpreter
-
-imp_k_haskell_dir      := $(imp_k_dir)/haskell
-imp_k_haskell_files    := $(imp_k_haskell_dir)/imp-k.k
-#imp_k_haskell_kompiled := $(imp_k_haskell_dir)/imp-k-kompiled/definition.kore
-imp_k_haskell_kompiled := $(imp_k_haskell_dir)/imp-k-kompiled/compiled.txt
-
-# Tangle definition from *.md files
-
 tangle := .k
 
-$(imp_k_llvm_dir)/%.k: %.md $(TANGLER)
-	@mkdir -p $(imp_k_llvm_dir)
-	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
-
-$(imp_k_haskell_dir)/%.k: %.md $(TANGLER)
-	@mkdir -p $(imp_k_haskell_dir)
-	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
-
-# Kompiling
-
-build: build-imp-k
-build-imp-k: $(imp_k_llvm_kompiled) $(imp_k_haskell_kompiled)
+build: build-imp build-fun
 
 KOMPILE_OPTS += -ccopt -std=c++14 -O2
 
-# IMP K Kompiled
+### IMP
 
-$(imp_k_llvm_kompiled): $(imp_k_llvm_files)
-	$(K_BIN)/kompile --main-module $(imp_k_module) --backend llvm              \
-	                 --syntax-module $(imp_k_module) $(imp_k_llvm_dir)/imp-k.k \
-	                 --directory $(imp_k_llvm_dir) -I $(imp_k_llvm_dir)        \
+build-imp: $(imp_llvm_kompiled) $(imp_haskell_kompiled)
+
+imp_module := IMP
+imp_dir    := $(DEFN_DIR)/k/imp
+
+imp_llvm_dir      := $(imp_dir)/llvm
+imp_llvm_files    := $(imp_llvm_dir)/imp.k
+imp_llvm_kompiled := $(imp_llvm_dir)/imp-kompiled/interpreter
+
+imp_haskell_dir      := $(imp_dir)/haskell
+imp_haskell_files    := $(imp_haskell_dir)/imp.k
+imp_haskell_kompiled := $(imp_haskell_dir)/imp-kompiled/definition.kore
+
+$(imp_llvm_dir)/%.k: %.md $(TANGLER)
+	@mkdir -p $(imp_llvm_dir)
+	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
+
+$(imp_haskell_dir)/%.k: %.md $(TANGLER)
+	@mkdir -p $(imp_haskell_dir)
+	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
+
+$(imp_llvm_kompiled): $(imp_llvm_files)
+	$(K_BIN)/kompile --main-module $(imp_module) --backend llvm              \
+	                 --syntax-module $(imp_module) $(imp_llvm_dir)/imp.k \
+	                 --directory $(imp_llvm_dir) -I $(imp_llvm_dir)        \
 	                 $(KOMPILE_OPTS)
 
-$(imp_k_haskell_kompiled): $(imp_k_haskell_files)
-	$(K_BIN)/kompile --main-module $(imp_k_module) --backend java                 \
-	                 --syntax-module $(imp_k_module) $(imp_k_haskell_dir)/imp-k.k \
-	                 --directory $(imp_k_haskell_dir) -I $(imp_k_haskell_dir)     \
+$(imp_haskell_kompiled): $(imp_haskell_files)
+	$(K_BIN)/kompile --main-module $(imp_module) --backend java                 \
+	                 --syntax-module $(imp_module) $(imp_haskell_dir)/imp.k \
+	                 --directory $(imp_haskell_dir) -I $(imp_haskell_dir)     \
+	                 $(KOMPILE_OPTS)
+
+### FUN
+
+build-fun: $(fun_llvm_kompiled) $(fun_haskell_kompiled)
+
+fun_module := FUN
+fun_dir    := $(DEFN_DIR)/k/fun
+
+fun_llvm_dir      := $(fun_dir)/llvm
+fun_llvm_files    := $(fun_llvm_dir)/fun.k
+fun_llvm_kompiled := $(fun_llvm_dir)/fun-kompiled/interpreter
+
+fun_haskell_dir      := $(fun_dir)/haskell
+fun_haskell_files    := $(fun_haskell_dir)/fun.k
+fun_haskell_kompiled := $(fun_haskell_dir)/fun-kompiled/definition.kore
+
+$(fun_llvm_dir)/%.k: %.md $(TANGLER)
+	@mkdir -p $(fun_llvm_dir)
+	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
+
+$(fun_haskell_dir)/%.k: %.md $(TANGLER)
+	@mkdir -p $(fun_haskell_dir)
+	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
+
+$(fun_llvm_kompiled): $(fun_llvm_files)
+	$(K_BIN)/kompile --main-module $(fun_module) --backend llvm              \
+	                 --syntax-module $(fun_module) $(fun_llvm_dir)/fun.k \
+	                 --directory $(fun_llvm_dir) -I $(fun_llvm_dir)        \
+	                 $(KOMPILE_OPTS)
+
+$(fun_haskell_kompiled): $(fun_haskell_files)
+	$(K_BIN)/kompile --main-module $(fun_module) --backend java                 \
+	                 --syntax-module $(fun_module) $(fun_haskell_dir)/fun.k \
+	                 --directory $(fun_haskell_dir) -I $(fun_haskell_dir)     \
 	                 $(KOMPILE_OPTS)
 
 # Test
@@ -113,12 +143,14 @@ $(imp_k_haskell_kompiled): $(imp_k_haskell_files)
 
 CHECK := git --no-pager diff --no-index --ignore-all-space -R
 
-test: test-imp-k
+test: test-imp test-fun
 
-test_imp_files := $(wildcard tests/*.imp)
+### IMP
+
+test-imp: $(test_imp_files:=.run-k)
+
+test_imp_files  := $(wildcard tests/*.imp)
 prove_imp_files := $(wildcard tests/*-spec.k)
-
-test-imp-k: $(test_imp_files:=.run-k)
 
 tests/%.imp.run-k: tests/%.imp.k-out
 	$(CHECK) $< tests/$*.imp.k-expected
@@ -127,8 +159,28 @@ tests/%-spec.k.prove: tests/%-spec.k.out
 	$(CHECK) $< tests/$*-spec.k.expected
 
 .SECONDARY: $(test_imp_files:=.k-out)
-tests/%.imp.k-out: tests/%.imp $(imp_k_llvm_kompiled)
-	krun --directory $(imp_k_llvm_dir) $< > $@
+tests/%.imp.k-out: tests/%.imp $(imp_llvm_kompiled)
+	krun --directory $(imp_llvm_dir) $< > $@
 
-tests/%-spec.k.out: tests/%-spec.k $(imp_k_haskell_kompiled)
-	kprove --directory $(imp_k_haskell_dir) $< --def-module VERIFICATION > $@
+tests/%-spec.k.out: tests/%-spec.k $(imp_haskell_kompiled)
+	kprove --directory $(imp_haskell_dir) $< --def-module VERIFICATION > $@
+
+### FUN
+
+test-fun: $(test_fun_files:=.run-k)
+
+test_fun_files  := $(wildcard tests/*.fun)
+prove_fun_files := $(wildcard tests/*-spec.k)
+
+tests/%.fun.run-k: tests/%.fun.k-out
+	$(CHECK) $< tests/$*.fun.k-expected
+
+tests/%-spec.k.prove: tests/%-spec.k.out
+	$(CHECK) $< tests/$*-spec.k.expected
+
+.SECONDARY: $(test_fun_files:=.k-out)
+tests/%.fun.k-out: tests/%.fun $(fun_llvm_kompiled)
+	krun --directory $(fun_llvm_dir) $< > $@
+
+tests/%-spec.k.out: tests/%-spec.k $(fun_haskell_kompiled)
+	kprove --directory $(fun_haskell_dir) $< --def-module VERIFICATION > $@
