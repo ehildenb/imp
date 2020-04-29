@@ -155,18 +155,22 @@ failing_tests := $(shell cat tests/failing)
 
 ### IMP
 
+IMP = ./imp
+
 test_imp_files  := $(filter-out $(failing_tests), $(wildcard tests/imp/*.imp))
 prove_imp_files := $(filter-out $(failing_tests), $(wildcard tests/imp/*-spec.k))
 
 test-imp: $(test_imp_files:=.run) $(prove_imp_files:=.prove)
 
 tests/imp/%.imp.out: tests/imp/%.imp $(imp_llvm_kompiled)
-	krun --directory $(imp_llvm_dir) $< > $@
+	$(IMP) run $< > $@
 
 tests/imp/%-spec.k.prove: tests/imp/%-spec.k $(imp_haskell_kompiled)
-	kprove --directory $(imp_haskell_dir) $< --def-module VERIFICATION
+	$(IMP) prove $< VERIFICATION
 
 ### FUN
+
+FUN = ./fun
 
 test_fun_files  := $(filter-out $(failing_tests), $(wildcard tests/fun/*.fun))
 prove_fun_files := $(filter-out $(failing_tests), $(wildcard tests/fun/*-spec.k))
@@ -174,7 +178,7 @@ prove_fun_files := $(filter-out $(failing_tests), $(wildcard tests/fun/*-spec.k)
 test-fun: $(test_fun_files:=.run)
 
 tests/fun/%.fun.out: tests/fun/%.fun $(fun_llvm_kompiled)
-	krun --directory $(fun_llvm_dir) $< > $@
+	$(FUN) run $< > $@
 
 tests/fun/%-spec.k.prove: tests/fun/%-spec.k
-	kprove --directory $(fun_haskell_dir) $< --def-module VERIFICATION
+	$(FUN) prove $< VERIFICATION
