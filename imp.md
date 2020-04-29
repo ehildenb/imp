@@ -108,8 +108,8 @@ The braces are simple discarded in favor of their contents.
 New variables can be declared with declaration `int_;` (and they are immediately initialized to 0).
 
 ```k
-    syntax Ids ::= List{Id,","}
- // ---------------------------
+    syntax Ids ::= List{Id,","} [seqstrict]
+ // ---------------------------------------
 
     syntax Stmt ::= "int" Ids ";"
  // -----------------------------
