@@ -4,3 +4,4 @@
 /imp-hs/.stack-work
 /imp-hs/stack.yaml.lock
 /tests/*/*.out
+/media/*/*.pdf

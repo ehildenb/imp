@@ -182,3 +182,19 @@ tests/fun/%.fun.out: tests/fun/%.fun $(fun_llvm_kompiled)
 
 tests/fun/%-spec.k.prove: tests/fun/%-spec.k
 	$(FUN) prove $< VERIFICATION
+
+# Media
+# -----
+
+media_pdfs := $(wildcard media/*/*.md)
+metropolis_theme := $(BUILD_DIR)/media/metropolis/beamerthememetropolis.sty
+
+media: $(media_pdfs:.md=.pdf)
+
+media/%.pdf: media/%.md
+	@mkdir -p $(dir $@)
+	cat $^ | pandoc --from markdown --filter pandoc-citeproc --to beamer --output $@
+
+$(metropolis_theme):
+	git submodule update --init -- $(dir $@)
+	cd $(dir $@) && $(MAKE)
