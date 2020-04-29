@@ -29,6 +29,8 @@ Defined in the [k-tutorial](https://github.com/ehildenb/k-tutorial) repository.
 ### Build
 
 ```sh
+git clone 'https://github.com/ehildenb/k-tutorial'
+cd k-tutorial
 make deps
 make build -j8
 ```
