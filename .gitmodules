@@ -2,3 +2,7 @@
 	path = deps/pandoc-tangle
 	url = https://github.com/ehildenb/pandoc-tangle
 	ignore = untracked
+[submodule "deps/metropolis"]
+	path = deps/metropolis
+	url = https://github.com/matze/mtheme
+	ignore = untracked
