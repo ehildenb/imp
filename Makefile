@@ -44,12 +44,14 @@ distclean: clean
 # Dependencies
 # ------------
 
-deps: $(K_RELEASE)/lib/java/kernel-1.0-SNAPSHOT.jar
+k_release := $(K_RELEASE)/lib/java/kernel-1.0-SNAPSHOT.jar
 
-$(K_RELEASE)/lib/java/kernel-1.0-SNAPSHOT.jar:
+deps: $(k_release)
+
+$(k_release):
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(K_DIR) $(K_RELEASE_TAR)
-	curl --location --output $(K_RELEASE_TAR) $(K_RELEASE_TAR_URL)
+	curl --location --output $(K_RELEASE_TAR) https://github.com/kframework/k/releases/download/$(K_RELEASE_TAR_URL)
 	mkdir -p $(K_RELEASE)
 	tar --extract --file $(K_RELEASE_TAR) --strip-components 1 --directory $(K_RELEASE)
 	krun --version
@@ -89,13 +91,13 @@ $(imp_haskell_dir)/%.k: %.md $(TANGLER)
 	@mkdir -p $(imp_haskell_dir)
 	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
 
-$(imp_llvm_kompiled): $(imp_llvm_files)
+$(imp_llvm_kompiled): $(imp_llvm_files) $(k_release)
 	kompile --main-module $(imp_module) --backend llvm                 \
 	        --syntax-module $(imp_syntax_module) $(imp_llvm_dir)/imp.k \
 	        --directory $(imp_llvm_dir) -I $(imp_llvm_dir)             \
 	        $(KOMPILE_OPTS)
 
-$(imp_haskell_kompiled): $(imp_haskell_files)
+$(imp_haskell_kompiled): $(imp_haskell_files) $(k_release)
 	kompile --main-module $(imp_module) --backend haskell                 \
 	        --syntax-module $(imp_syntax_module) $(imp_haskell_dir)/imp.k \
 	        --directory $(imp_haskell_dir) -I $(imp_haskell_dir)          \
@@ -127,13 +129,13 @@ $(fun_haskell_dir)/%.k: %.md $(TANGLER)
 	@mkdir -p $(fun_haskell_dir)
 	pandoc --from markdown --to "$(TANGLER)" --metadata=code:"$(tangle)" $< > $@
 
-$(fun_llvm_kompiled): $(fun_llvm_files)
+$(fun_llvm_kompiled): $(fun_llvm_files) $(k_release)
 	kompile --main-module $(fun_module) --backend llvm                 \
 	        --syntax-module $(fun_syntax_module) $(fun_llvm_dir)/fun.k \
 	        --directory $(fun_llvm_dir) -I $(fun_llvm_dir)             \
 	        $(KOMPILE_OPTS)
 
-$(fun_haskell_kompiled): $(fun_haskell_files)
+$(fun_haskell_kompiled): $(fun_haskell_files) $(k_release)
 	kompile --main-module $(fun_module) --backend haskell                 \
 	        --syntax-module $(fun_syntax_module) $(fun_haskell_dir)/fun.k \
 	        --directory $(fun_haskell_dir) -I $(fun_haskell_dir)          \
